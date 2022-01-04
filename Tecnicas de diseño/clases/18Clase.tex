@@ -1,0 +1,102 @@
+\section{RESTful API}
+\begin{itemize}
+\item Significa Represantational State Transfer
+\item Utiliza estándares existentes como HTTP
+\item Comunicación cliente-servidor
+\item Se representa en 3 niveles de madurez 
+\item Nivel 0 sobre HTTP como transporte
+\item Nivel 1 Cada recurso tiene su propia URL o URI para referenciarlo
+\item Nivel 2 Métodos para darles significado
+\item Nivel 3 Darles otros enlaces
+\end{itemize}
+
+
+\subsection*{¿Que no es REST?}
+
+\begin{itemize}
+\item No es un estándar
+\item No es un protocolo
+\item No es un reemplazo de SOAP
+\item No es una biblioteca
+\end{itemize}
+
+\subsection*{Caracteristicas}
+
+\begin{itemize}
+\item Stateless: No guarda estado de un request. El server no guarda información del cliente/sesión/request previos. Se supone que no debe de necesitar persistir algo local. Esto se busca para la optimización de recursos y tener escalabilidad. Mientras que el server no tenga dependencia de clientes podemos agregar mas servers.
+\item Cacheable: Reduce ancho de banda usado, reduce la latencia
+\item Expone recursos, URI Uniform Resource Identifier, es una identificación unívoca de recursos con cadenas de caracteres. Uso de sustantivos en plural por convención. No verbos
+\item Es navegable debido a que en la respuesta puede ir un link que relaciona a otro recurso.
+\item Usa explícitamente los verbos HTTP, les da un significado dependiendo el verbo
+\end{itemize}
+
+
+
+\subsection*{Verbos del HTTP - Requests}
+
+\begin{itemize}
+\item \textbf{GET} solicita una representación de un recurso específico
+\item \textbf{POST} se utiliza para enviar una entidad a un recurso en específico
+\item \textbf{DELETE} borra un recurso en específico
+\item \textbf{PUT} reemplaza todas las representaciones actuales del recurso de destino con la carga útil de la petición
+\item \textbf{PATCH} aplica modificaciones parciales a un recurso (a diferencia de PUT)
+\item \textbf{OPTIONS} es utilizado para describir las opciones de comunicación para el recurso de destino
+\end{itemize}
+
+
+
+\subsection*{HTTP Status Codes - Responses}
+
+\begin{itemize}
+\item 1xx Informational
+\item 2xx Success
+\item 3xx Redirection
+\item 4xx Error del lado del cliente
+\item 5xx Error del lado del server
+\end{itemize}
+
+
+
+\subsection*{Security Design Principles}
+
+\begin{itemize}
+\item Least Privilege: Tener el menor privilegio requerido para hacer las acciones
+\item Fail-Safe Defaults: por defecto no tener acceso a los recursos
+\item Complete Mediation: El sistema debe validar los permisos de acceso a todos los recursos
+\item Keep it simple
+\item HTTPS
+\item PasswordHashes
+\item Never exporse information on URL
+\item Considerar agregar Timestamps en los requests
+\end{itemize}
+
+
+\subsection*{Autenticación \& Autorización}
+
+\begin{itemize}
+\item Autenticación es identificar al usuario y autorización, es que dicho usuario pueda realizar ciertas acciones
+\item \textbf{Basic auth}: Es base 64, es fácilmente decodificable. Se debería usar con otro mecanismo (HTTP/SLL)
+\item \textbf{API Keys}: Es un token que el cliente provee cuando hace la llamada. Se supone que es secreta y solo el cliente y servidor la conocen. Se debería de usar con otro mecanismo (HTTPS)
+\item \textbf{Bearer Authentication}: Utiliza tokens de seguridad llamados Bearer (da acceso al portador del token). Se envía en un header de Authorization
+\item \textbf{OAuth}: Es un protocolo de autenticación. Consiste en delegar la autenticación de usuario a un servicio externo que gestiona las cuentas. Nuestro sistema no guarda usuario y password.
+\item \textbf{JWT}: Genera un token que guarda información, esto hace que las credenciales del usuario viajen una vez. El token no se almacena del lado del servidor para validar. El uso de JWT incrementa la eficiencia en las aplicaciones evitando hacer múltiples llamadas a la base de datos. El server valida la firma del JWT para saber que lo que el envió al cliente no se modifico y utiliza la información del mismo. De esta forma se sigue siento stateless y se hace mas eficiente la validación del usuario
+\item \textbf{Refresh Token}: Deberían de tener un tiempo limitado de vida. Es otro token que sirve para un solo uso y es utilizado para obtener un nuevo access token. (los regenera) Es una credencial que permite obtener nuevos tokens sin necesidad de usar las credenciales de usuario y password nuevamente
+\end{itemize}
+
+
+\subsection*{Versionado}
+\begin{itemize}
+\item REST no provee un mecanismo definido para versionado, se suelen usar las siguientes estrategias
+\item Usando la URI
+\item Usando un Custum Header
+\item Usando el Header Accept
+\end{itemize}
+
+
+\subsection*{Otros temas}
+
+\begin{itemize}
+\item Respuestas: Mantenerlas lo mas estandarizadas las mismas.
+\item Utilizar código de errores HTTP
+\item Paginado, Filtros y Ordenamientos: Suelen usarse como parámetros del querystring o del body
+\end{itemize}

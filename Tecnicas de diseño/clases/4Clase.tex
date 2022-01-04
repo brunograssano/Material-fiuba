@@ -1,0 +1,33 @@
+\section{Refactoring}
+Tecnica para reesructurar el cuerpo del codigo cambiando la estructua interna sin cambiar el comportamiento externo. Para esto se necesitan tener unit tests que cubran correctamente el codigo.
+
+\subsection*{Code Smells}
+Son alertas que detectamos y tenemos que revisar..
+\begin{itemize}
+\item Codigo duplicado
+\item Metodos o funciones de longitud enorme
+\item Clases enormes con muchos metodos.
+\item Muchos parametros en algun metodo/funcion
+\item 'Shotgun Surgery', un cambio en una clase hace que se tenga que tocar en todos lados
+\item 'Feature envy',  es codigo que esta interesado en cuestiones del estado de otro objeto en vez del suyo. Rompe el tell don't ask.
+\item 'Data clumps', cuando hay muchos metodos que reciben los mismos parametros, indica que por ahi hay algo que no modelamos.
+\item 'Primitive Obsession', cuando tenemos atributos que tienen logica asociada, por ejemplo con los telefonos, contrañeas, monedas, ...
+\item 'Switch statements', indica que hay cierto comportamiento asociado al tipo que no esta modelado.
+\item 'Lazy class', clases que tienen muy poco comportamiento o estado.
+\item 'Message Chains', indica que se van encadenando dependencias que conviene ocultar.
+\item 'Data class', clases que solo tienen data.
+\end{itemize}
+
+\subsection*{Soluciones}
+\begin{itemize}
+\item Introduce Explaining Method
+\item Split Temporary Variable
+\item Extract class
+\item Decompose conditional
+\item Remove control flag
+\item Replace nested conditionals with guard clauses
+\item Replace parameter with method
+\item Introduce parameter object
+\item Replace error with exception
+\item Replace primitive object
+\end{itemize}

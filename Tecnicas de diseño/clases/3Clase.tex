@@ -1,0 +1,90 @@
+\section{Practicas del código}
+
+\begin{itemize}
+\item Hay que estar orgullosos del código que hacemos, tratar de hacerlo de la mejor forma posible. El costo de poseer código no mantenible es muy alto en el tiempo, la productividad se reduce rápidamente.
+\item \textit{Lo podemos medir con los WTF/minute (clean code)}
+\item Buscamos que nuestro código sea mantenible, claro, legible, flexible, y simple.
+\item Siguen solo algunas practicas mencionadas de los primeros capítulos del libro \textit{Clean Code de Robert C. Martin}, si no lo leíste todavía, te lo recomiendo.
+\end{itemize}
+
+
+\subsection*{Nombres}
+\begin{itemize}
+\item Usar nombres claros antes que comentarios.
+\item Usar nombres pronunciables
+\item Tienen que revelar la intención que quieren transmitir.
+\item Usar constantes antes que valores fijos
+\item Cuidado con las notaciones y prefijos
+\item No usar nombres con na letra distinta porque ya se uso \textit{class - klass}
+\item Usar nombres del dominio de la solución, pero también de cuestiones mas de programación! \textit{AccountVisitor}, el Visitor indica el patrón de diseño.
+\end{itemize}
+
+\subsection*{Funciones}
+\begin{itemize}
+\item Devuelta los nombres!
+\item Una solo motivo
+\item Lo mas chicas posibles. \textit{Clean code dice máximo 20 lineas}
+\item Evitar switch. Encapsularlo si es necesario, que estén solo una vez.
+\item Cuidado con los argumentos, menos es lo mejor.
+\item Evitar booleanos en argumentos o flags. Indica que la función hace mas de una función.
+\item Evitar argumentos de entrada como salida.
+\end{itemize}
+
+\subsection*{Comentarios}
+\begin{itemize}
+\item Dependen del caso
+\item El código debería de auto documentarse.
+\item Tratar de evitarlos
+\item Hay algunos que son buenos, informativos, o que explican la intención de algo.
+\item Pasan a ser parte del código, hay que mantenerlo si cambia o  se vuelven desinformativos.
+\item Los TODO son temporales y a corto plazo.
+\item Revisar el código comentario. ¿Lo borro o no?
+\end{itemize}
+
+\subsection*{Tests unitarios}
+Tienen que cumplir F.I.R.S.T. Solo los menciono, para mas detalles buscarlo o revisar los apuntes de Algoritmos III.
+\begin{itemize}
+\item \textbf{F}ast
+\item \textbf{I}ndependent
+\item \textbf{R}epeatable
+\item \textbf{S}elf-Validating
+\item \textbf{T}imely
+\end{itemize}
+
+Se recomiendan para expandir las lecturas recomendadas de Algoritmos III.
+\begin{itemize}
+\item \href{https://esj.com/articles/2012/09/24/better-unit-testing.aspx}{Better unit testing}
+\item \href{http://fluxens.com/unittesting.html}{Unit testing}
+\end{itemize}
+
+
+\section{Principios SOLID}
+\begin{itemize}
+\item Buscan llegar a un buen diseño. Cuando tenemos uno malo, el código se vuelve rígido (dificultad de cambiar), frágil (toco y se rompe), inmóvil (imposibilidad de reutilizar software) y viscoso (el ambiente de desarrollo se vuelve lento e ineficiente)
+\item Las características de un buen diseño es una alta cohesión y un bajo acoplamiento.
+\item Lectura recomendada \href{https://github.com/7510-tecnicas-de-disenio/material-clases/blob/master/Solid/Principles_and_Patterns.pdf}{Principles and patterns}
+\end{itemize}
+
+\subsection*{Single Responsibility}
+Tienen que tener una sola responsabilidad. Una sola razón de cambio. Un solo nivel de abstracción.
+
+\subsection*{Open Closed}
+Abierto para la extensión, cerrado para la modificación. No debe de ser necesario tocar el código que ya esta para extender/agregar funcionalidad. Va de la mano con el polimorfismo. Queremos que nuestros diseños sean simples, para ser mantenible y entendible.  No podemos tener un diseño Open-Closed para todo el código, tenemos que tenerlo para lo que sabemos que puede venir un cambio.
+
+\textit{Tratar de atrapar la primera bala.} Quizás al comienzo no sabemos que es lo va a cambiar, entonces puede convenir un código simple antes que preparar todo con Open-Closed. Cuando llegue el cambio, hacer refactors y ahí aplicar el principio.
+
+Un \textit{if} ya elimina el principio, porque separa en A y en B, y puede aparecer una tercera.
+
+\subsection*{Liskov Substitution}
+Las clases padres deberían de poder utilizarse a través de las clases hijas, y no debería notar la diferencia. Se puede romper cuando una clase no es realmente el \textit{es un} del padre. \textit{El ejemplo de los patos y el pato de goma o de la elipse y el circulo.}
+
+\subsection*{Interface Segregation}
+Tratar de mantener interfaces simples, lo mas atómicas posibles. Dar a conocer solo lo que necesitan y nada mas. 
+
+Los clientes no deberían de estar forzados a depender de interfaces que no usan.
+
+\subsection*{Dependency Inversion}
+
+No depender directamente de una clase o sistema, poner una interfaz o capa de abstracción en el medio. Evitar que el código de alto nivel dependa de cosas de bajo nivel, hay que invertir esta lógica.
+
+Generalmente si se cumple este, se esta cumpliendo el Open-Closed.

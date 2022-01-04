@@ -1,0 +1,150 @@
+\documentclass[titlepage,a4paper]{article}
+
+\usepackage{a4wide}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue,bookmarksopen=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{fancyhdr}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{minted} % codigo
+
+
+\pagestyle{fancy} % Encabezado y pie de página
+\fancyhf{}
+\fancyhead[L]{Apuntes TDD - BG}
+\fancyhead[R]{2C 2021 - FIUBA}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyfoot[C]{\thepage}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+\begin{titlepage} % Carátula
+	\hfill\includegraphics[width=6cm]{logofiuba.jpg}
+    \centering
+    \vfill
+    \Huge \textbf{Apuntes TDD}
+    \vskip2cm
+    \Large [75.10] Técnicas de Diseño\\
+    Curso Pantaleo \\
+    2C 2021 
+    \vfill
+    \begin{tabular}{ | l | } % Datos del alumno
+      \hline
+      Grassano, Bruno \\ \hline
+      bgrassano@fi.uba.ar \\ \hline
+  	\end{tabular}
+    \vfill
+    \vfill
+\end{titlepage}
+
+\tableofcontents % Índice general
+
+\newpage
+
+\section{Introducción}\label{sec:intro}
+El presente archivo contiene los apuntes que fueron tomados a lo largo de la cursada de Técnicas de Diseño (75.10) curso Pantaleo.
+
+La materia trata sobre el diseño de software, cubre varios temas (al comienzo en su mayoría ya conocidos de otras materias). La cursada consiste de un parcial en el que se evalúa principalmente los temas de modelo de dominio y arquitectura, y varias entregas de ejercicios (este cuatrimestre hubo 7 entregas individuales, en otros había menos individuales y un TP grupal). Después de eso queda rendir el final solamente.
+
+%materia->trata de diseño de software
+%que esperar-> adquirir conocimiento base para el desarrollo, para un problema de diseño
+%problemas y tecnologias variados
+%esperar la formacion de base para pararnos ante un problema
+%sesgo orientado a OOP en la materia
+%hacer practicas
+%rendir un parcial (y aprobar)
+%aprobar coloquio
+%no graban clases (guillermo), diego las graba (avisar si no lo pusieron)
+
+\newpage
+
+\section*{Clase 1}
+\input{clases/1Clase}
+\newpage
+
+\section*{Clase 2}
+\input{clases/2Clase}
+\newpage
+
+\section*{Clase 3}
+\input{clases/3Clase}
+\newpage
+
+\section*{Clase 4}
+\input{clases/4Clase}
+\newpage
+
+\section*{Clase 5}
+\input{clases/5Clase}
+\newpage
+
+\section*{Clase 6}
+\input{clases/6Clase}
+\newpage
+
+\section*{Clase 7}
+\input{clases/7Clase}
+\newpage
+
+\section*{Clase 8}
+Fue la explicación de una arquitectura con un ejemplo.
+
+\section*{Clase 9}
+\input{clases/9Clase}
+\newpage
+
+\section*{Clase 10}
+\input{clases/10Clase}
+\newpage
+
+\section*{Clase 11}
+\input{clases/11Clase}
+\newpage
+
+\section*{Clase 12}
+\input{clases/12Clase}
+
+\section*{Clase 13}
+\input{clases/13Clase}
+\newpage
+
+\section*{Clase 14 a 17}
+\input{clases/14Clase}
+\newpage
+
+
+\section*{Clase 18}
+\input{clases/18Clase}
+\newpage
+
+\section*{Clase 19}
+\input{clases/19Clase}
+\newpage
+
+\section*{Clase 20}
+\input{clases/20Clase}
+\newpage
+
+
+\section*{Clase 21}
+\input{clases/21Clase}
+\newpage
+
+\section*{Otras clases}
+Clases de consulta de los ejercicios, el parcial, y feriados...
+
+\section{Bibliografía}
+\begin{itemize}
+    \item Ingenieria de Software, Guillermo Pantaleo, Ludmila Rinaudo
+    \item Design Patterns, Erich Gamma
+    \item Clean Code, Robert C. Martin
+    \item Papers y material de Martin Fowler sobre SOLID
+    \item Material dado en clase, parte se puede encontrar en  \href{https://github.com/7510-tecnicas-de-disenio/material-clases}{este repo}.
+    \item REST-API Design Rulebook Mark Masse
+    \item Clean Architecture, Robert C. Martin (Me parece que no lo mencionaron en el curso pero esta bueno)
+\end{itemize}
+
+\end{document}

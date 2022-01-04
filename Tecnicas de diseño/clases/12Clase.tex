@@ -1,0 +1,51 @@
+
+% administrador es probable que no vaya a cambiar las tareas
+% operador e inspector pueden llegar a tener cambios
+% ea, sistema cliente servidor que se tiene que conectar a la red con el sistema viejo
+% microkernel con capas, layers, ordenadas segun el grado de abstraccion
+% ea arriba quiere decir que lo reusable es el microkernel
+% hay que tener en cuenta las cuestiones independientemente de la arquitectura
+
+\textit{Se dio una clase antes en la que se explico el parcial y la parte de paradigmas. Uní lo de paradigmas con la siguiente clase por ser corto.}
+
+\section{Paradigmas}
+\begin{itemize}
+\item En una manera es un modo de pensar. En nuestro caso es un enfoque, una forma de pensar un problema.
+\item C, C++, Java, son lenguajes usados para modelar conceptos y relacionarlos con otros. No están pensados para procesar datos. (Las ultimas versiones están incluyendo ya cuestiones de programación funcional)
+\item Programación lógica que esta orientado a la demostración de teoremas. Navega estructuras simbólicas complejas según un conjunto de reglas. (\textit{Ej. Prolog})
+\item La programación funcional, algoritmos complejos resueltos a partir de la composición de funciones. Es ideal para implementar algoritmos y procesar datos.
+\item La idea es resolver los distintos aspectos que nos presenta un problema con el enfoque adecuado.
+\end{itemize}
+
+
+
+
+\section{Programación Funcional}
+
+\begin{itemize}
+\item Es un paradigma de programación basado en funciones matemáticas y declarativo. La ejecución de programas es ir evaluando las funciones.
+\item Algunos ejemplos de lenguajes son Lisp, Haskell, Erlang y esta en otros multiparadigma.
+\item Es simulado al resolver problemas cuya solución natural es funcional (Git, Docket, REST, React)
+\item \textit{Se ve el tema de forma más completa en Lenguajes Formales.}
+\end{itemize}
+
+\subsection*{Características}
+
+\begin{itemize}
+\item Las \textbf{funciones se tratan como cualquier otro valor}. 
+\begin{itemize}
+    \item Tienen expresiones literales
+    \item Pueden ser argumentos a funciones
+    \item Pueden ser retornadas por otras funciones
+\end{itemize}
+\item Las funciones tienen que ser \textbf{predecibles}, producir la misma salida para una determinada entrada. Esto se rompe con aleatoriedad, entrada/salida y estados variables (tiempo/ubicación)
+\item Se tiene que tener \textbf{inmutabilidad} también. Evaluar una función no modifica el estado del programa. En lugar de actualizar valores, se crean nuevos valores. El estado mutable genera race conditiones, acciones a distancia, y cada mutación puede romper variantes. Las funciones no pueden cambiar su entrada o contexto.
+\item En funcional se suele usar la \textbf{recursividad}. Se define una función en termino de si misma. Se determina un caso base y uno recursivo que nos acerca al final. Una propiedad que hay que aprovechar es la de llamados de cola. Remplaza el stack frame en lugar de crear uno nuevo. 
+\item \textbf{Funciones de orden superior}, son funciones que operan sobre otras funciones como argumento. Abstraen estructuras de control, describen la intención con la que se manipulan valores. Algunos ejemplos son map (aplica una función a cada uno de los elementos), filter (devuelve los que cumplen la condición) y reduce (combina valores). Se prefiere el uso de funciones de orden superior a la recursividad.
+\item El modelo de ejecución es la especificación del orden y ejecución del programa. El aplicativo evalúa cada argumento, remplaza los argumentos por su valores y evalúa el cuerpo hasta llegar a una expresión primitiva (los no funcionales usan solo esta forma). El otro orden es el normal. Busca el llamado a función mas externo y lo remplaza por su cuero sustituyendo los argumentos por su expresión. Puede evaluar fu unciones que son ciclos infinitos en orden aplicativo.
+\item Hay que minimizar los efectos implícitos no locales.
+\end{itemize}
+
+
+
+

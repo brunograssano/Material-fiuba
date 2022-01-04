@@ -1,0 +1,65 @@
+\section{Docker}
+\begin{itemize}
+\item Docker es una herramienta que automiza el despliegue de aplicaciones dentro de contenedores
+\end{itemize}
+
+
+\subsection*{Contexto}
+\subsubsection*{Linux Namespaces}
+\begin{itemize}
+\item Agrupar y controlar acceso a recursos del sistema operativo. Separa estos recursos para distintos grupos de procesos.
+\item Es de muy bajo nivel
+\end{itemize}
+
+
+\subsubsection*{Infrastructure as Code}
+\begin{itemize}
+\item Desplegar entornos automáticamente a partir de una descripción del entorno deseado
+\item Se especifica que queremos tener y el gestor se encarga de hacerlo.
+\item Surge el Problema de imagen dorada donde se siguen agregando modificaciones sobre un estado inicial que no se sabe o no se puede reconstruir.
+\end{itemize}
+
+
+
+\subsection*{Docker}
+\begin{itemize}
+\item Docker aparece para arreglar esto.
+\item Container: un grupo aislado de procesos
+\item Image: Un template usado para crear contenedores
+\item Dockerfile: un archivo con instrucciones para construir una imagen, el dockerfile que genero la imagen(no garantiza generar una imagen idéntica)
+\item Docker nos brinda consistencia, cualquier imagen se obtiene e inicia de la misma manera.
+\item Nos brinda replicabilidad, los contenedores basados en una misma imagen son inicialmente iguales.
+\item Aislamiento, se controla la interacción entre la aplicación en un contenedor y el mundo exterior
+\item Los contenedores son livianos, se dedican a un único propósito, mantienen el estado mínimo y se pueden (re)iniciar rápidamente
+\end{itemize}
+
+
+
+\subsubsection*{Dockerfile}
+\begin{itemize}
+\item Describe la serie de pasos para construir una imagen
+\item Cada una empieza referenciando a otra imagen generalmente que se referencia a si misma.
+\item Maneja también el volumen del área de datos, las networks para interfaz de red interna, y los vínculos con el exterior (mounts, ports)
+\item Hay ciertas aplicaciones que no pueden operar dentro de un contenedor por cuestiones de rendimiento o permisos.
+\item No es una maquina virtual.
+\end{itemize}
+
+
+\subsubsection*{Orquestadores}
+
+\begin{itemize}
+\item Coordinan el uso de múltiples contenedores para implementar una única aplicación.
+\item Permite tener tolerancia a fallos, balancear la carga, distribuir, y configurar contenedores heterogéneos.
+\end{itemize}
+
+
+% api nos devuelve un codigo y otro servicio lo valida
+% se puede integrar alguna api de servicio de email tambien
+% podemos simplificarlo
+% paquetes de envio SMTP
+% biblioteca mailgun? que consiste en hacer un POST a donde dicen
+% forma sencilla es imprimir en consola o devolverlo a modo de respuesta
+% JWT para autenticacion, generar token
+
+
+% elegir imagen particular de node y mongo en docker

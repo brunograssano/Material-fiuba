@@ -1,0 +1,30 @@
+\section{Git}
+Se deja un resumen de lo que se dijo (estos temas ya se vieron en otras materias principalmente). Si se quiere ver sobre el funcionamiento interno de Git  revisar las notas en el apunte de Sistemas Operativos.
+
+\begin{itemize}
+\item Estados del sistema para conservar para el futuro
+\item Compartirlo para el resto del equipo
+\item Cada commit tiene archivos, fecha, mensaje, commits ancestros.
+\item El único requisito es que la historia no tenga ciclos.
+\item El equipo debe decidir como organizarse.
+\item Combinar ideas base y flujos pre-armados.
+\item Issues para ir relacionando la información que tenemos.
+\item Commits atómicos
+\item Una sola razon para todo lo que cambio.
+\item No depende de cambios externos.
+\item Historia lineal para proyectos simples, costoso para separar lineas de trabajo 
+\item El control de versiones es naturalmente distribuido.
+\item Branches para proyectos mas grandes donde hay mas gente.
+\item Cuidado con los conflictos en los merge.
+\item Cuidado con los Shutgun Surgery si se esta resolviendo en distintas ramas.
+\item Hay una correlación entre mal diseño y no saber lo que hace el software.
+\item Pull requests para revisar la calidad del codigo y aplicacion. Tienen que ser atomicos tambien (una sola razon para lo que cambio). Similar a como queremos en los commits.
+\item Integracion continua para compilar y testear de forma automatica. Con esto integrar el trabajo realizado. (artefactos son archivos que quiero que se guarden)
+\item Despliegue continuo para probarlo en diferentes entornos.
+\item Cuidado con mantener dos branches largos. (van divergiendo cada vez mas)
+\item Branches de entorno
+\item Git Flow, la idea es tener dos branches a largo plazo. Master y Develop. Desde Develop salen Feature Branches que mergeamos devuelta a Develop. Git Flow agrega Release Branches (las creamos a partir de Develop, y solo le agregamos bug fixes), una vez que es adecuado para entregar al cliente, se hace el merge a master. Estan las branches de Hotfixes para emergencias, se les hace merge a Master y a Develop.
+\end{itemize}
+
+
+%links a recursos

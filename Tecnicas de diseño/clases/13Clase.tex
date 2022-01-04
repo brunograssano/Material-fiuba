@@ -1,0 +1,56 @@
+
+\subsection*{Imperativa vs Declarativa}
+\begin{itemize}
+\item Imperativa describe instrucciones a ejecutarse paso a paso para variar el estado del programa. El estado final debería de ser la solución al problema.
+\item La declarativa describe el problema que se quiere solucionar. El sistema usa la descripción para hallar un algoritmo que resuelva el problema.
+\item Todo sistema declarativo requiere capas imperativas para dar instrucciones al hardware e interactuar con el resto del mundo. El lenguaje en si mismo debe de tener acceso a estas capacidades.
+\end{itemize}
+
+
+
+\subsubsection*{¿Que hay que hacer si todo lo que tenemos es imperativo?}
+\begin{itemize}
+\item Alterar las entradas implícitas
+\item Invocar la subrutina
+\item Revertir los efectos colaterales de la subrutina
+\item Revertir los cambios en el primer paso.
+\end{itemize}
+
+\subsection*{Estructuras de datos persistentes}
+\begin{itemize}
+\item Se crean nuevos valores
+\item Los viejos los agarra el Garbage Collector o se siguen usando.
+\end{itemize}
+
+\subsection*{Funcional y objetos}
+\begin{itemize}
+\item El objeto es el estado unido a un comportamiento.
+\item La única incompatibilidad esta en que en vez de mutar objetos creamos objetos nuevos.
+\item Tenemos multimetodos, donde es polimórfico en todos los argumentos a la vez.
+\end{itemize}
+
+
+
+\subsection*{Functional core, imperative shell}
+\begin{itemize}
+\item Limita las capacidades imperativas a las partes que necesitan tenerlas
+\item El functional core tiene la lógica de dominio, no tiene acceso al mundo exterior, y es fácil de testear.
+\item La shell imperativa tiene la lógica de entrada/salida y es difícil de testear.
+\end{itemize}
+
+
+\subsection*{Redux}
+\begin{itemize}
+\item Los reduce generalmente se aplican a una secuencia espacial. Se puede aplicar también a una secuencia temporal.
+\item Los efectos clave son que los eventos son inmutables, el estado es inmutable, y la función de avance de estado es predecible. Todo puede volver a usarse sin distinción si es la primer o enésima vez. (Transiciones reproducibles y time travel debugging)
+\item Es una forma en que se comuniquen las diferentes vistas con un core funcional.
+\item Es en cierta forma en lo que se basa React.
+\item Se tienen reducers que van cambiando la forma del estado.
+\end{itemize}
+
+
+% la idea es modificar los onClick, que cada uno haga una accion
+% Cada uno llama a una funcion para crear la accion y la despacha
+
+
+
