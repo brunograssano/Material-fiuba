@@ -1,0 +1,163 @@
+\subsection{Calculo Lambda}
+\subsubsection*{Ejercicio 1}
+Escribir las siguientes expresiones con el menor número de paréntesis posible:
+
+\begin{enumerate}[label=\alph*)]
+    \item  ($\lambda$x.($\lambda$y.($\lambda$z.( (x z) (y z) ) ) ) )
+    
+    $\lambda$x. ($\lambda$y.($\lambda$z.( (x z) (y z) ) ) ) - Los externos se omiten (1)
+    
+    $\lambda$x.$\lambda$y. ($\lambda$z.( (x z) (y z) ) ) - Cuerpo de las abstracciones hasta el final o paréntesis (3)
+    
+    $\lambda$x.$\lambda$y.$\lambda$z. ( (x z) (y z) ) - Cuerpo de las abstracciones hasta el final o paréntesis (3)
+    
+     $\lambda$x.$\lambda$y.$\lambda$z. (x z) (y z) - Cuerpo de las abstracciones hasta el final o paréntesis (3)
+    
+    $\lambda$x.$\lambda$y.$\lambda$z. x z (y z) - Aplicaciones se asocian a la izquierda (2)? % la pag da este
+    
+    $\lambda$x. y.  z. (x z) (y z) - Opcional, se contraen las abstracciones lambda (4)
+    
+    \item ( ( (a b) (c d) ) ( (e f) (g h) ) )
+    
+    ( (a b) (c d) ) ( (e f) (g h) ) - Los externos se omiten (1)
+    
+   (a b) (c d) ( (e f) (g h) )  - Aplicaciones a la izquierda (2)
+    
+    a b (c d) ( (e f) (g h) )  - Aplicaciones a la izquierda (2)
+    
+    a b (c d) ( e f (g h) )  - Aplicaciones a la izquierda (2) % resultado dado por la pag
+    
+    \item ( $\lambda$x. ( ($\lambda$y. (y x)) ($\lambda$v. v) z) u) ($\lambda$w.w) 
+    
+    ( $\lambda$x. ( ($\lambda$y. y x ) ($\lambda$v. v) z) u) ($\lambda$w.w) - Aplicaciones a la izquierda (2)
+    
+    ( $\lambda$x. ($\lambda$y. y x ) ($\lambda$v. v) z u) ($\lambda$w.w) - Aplicaciones a la izquierda (2)
+
+\end{enumerate}
+
+\subsubsection*{Ejercicio 2}
+Restaurar todos los paréntesis descartados en las siguientes expresiones:
+
+\begin{enumerate}[label=\alph*)]
+\item  x x x x
+
+( x x x x ) - Los externos se omiten (1)
+
+( ( x x x ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+( ( ( x x ) x ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+\item $\lambda$x. x $\lambda$y. y
+
+( $\lambda$x. x $\lambda$y. y ) - Los externos se omiten (1)
+
+( $\lambda$x. ( x $\lambda$y. y ) ) - Cuerpo de las abstracciones hasta el final o paréntesis (3)
+
+( $\lambda$x. ( x ( $\lambda$y. y ) ) ) - Aplicaciones se asocian a la izquierda (2) %?
+
+\item $\lambda$x.( x $\lambda$y.y x x ) x
+
+ ( $\lambda$x.( x $\lambda$y.y x x ) x ) - Los externos se omiten (1)
+
+ ( ($\lambda$x.( x $\lambda$y.y x x  ) ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+ ( ($\lambda$x.(  ( x $\lambda$y.y x ) x ) ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+ ( ($\lambda$x.(  ( x $\lambda$y.y x ) x ) ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+ ( ($\lambda$x.(  (  (x $\lambda$y.y ) x ) x ) ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+ ( ($\lambda$x.(  (  (x ($\lambda$y.y) ) x ) x ) ) x ) - Aplicaciones se asocian a la izquierda (2)
+
+\end{enumerate}
+
+
+\subsubsection*{Ejercicio 3}
+Para las siguientes expresiones lambda:
+
+\begin{enumerate}[label=\alph*)]
+\item Identificar las ocurrencias de variables libres y ligadas. 
+\end{enumerate}
+
+\begin{enumerate}
+    \item  ( $\lambda$x.( ( $\lambda$y.y ) x ) ) z  -  x ligada, y ligada, z libre %1
+    
+	( $\lambda$x.( ( $\lambda$y.y ) x ) ) z       - Beta con z (orden normal)
+
+     ( $\lambda$y.y ) z ) - Beta con z
+
+      			 z
+    		%%%%%%%%% aplicativo 
+     ( $\lambda$x.( ( $\lambda$y.y ) x ) ) z 
+    
+	( $\lambda$x.x  ) z       - Beta con x (orden aplicativo)
+
+     z  - Beta con z
+    
+    
+    
+    \item ( $\lambda$x.$\lambda$y.x y ) ( z y )  -  x ligada, y ligada (operador), y libre (operando) , z libre % 2
+    
+( $\lambda$x.$\lambda$y.x y ) ( z y ) - Beta con x y alfa con la y (si no estaría ligada) (igual con orden normal y aplicativo)
+    
+$\lambda$u. ( z y )  u 
+
+    \item ( $\lambda$x.$\lambda$y.x ) x y -  x ligada en la funcion, x e y libres % 3
+    
+
+    \item ( $\lambda$x.( ( $\lambda$z.z x ) ( $\lambda$x.x ) ) ) y - x ligada en ambos casos, y libre, z ligada % 4
+        
+    \item ( $\lambda$x.( ( $\lambda$y.x y ) z ) ) ( $\lambda$x.x y ) %5
+    
+     x ligada en ambos casos, y ligada (operador de la abstracción interna de la función), y libre (operando), z libre
+    
+
+    \item ( ( $\lambda$y.( $\lambda$x.( ( $\lambda$x.$\lambda$y.x ) x ) ) y ) M ) N %6
+    
+     ( $\lambda$y.( $\lambda$x.( ( $\lambda$x.$\lambda$y.x ) x ) ) y ) M  N
+    
+    
+     - x interna ligada, x externa ligada, y ligada
+    
+    
+    \item ( $\lambda$x.$\lambda$y.$\lambda$x.x y z ) ($\lambda$x.$\lambda$y.y) M N - %7
+    
+    x interno ligado en la funcion
+    y ligado en la funcion y en el parametro
+    x libre en el parametro
+    x externo libre en la funcion
+    z libre
+    
+    
+    \item ( ( $\lambda$x.( $\lambda$y.$\lambda$z.z ) x ) ( ( $\lambda$x.x x x ) ( $\lambda$x.x x x ) ) ) x %8
+    
+      ( $\lambda$x.( $\lambda$y.$\lambda$z.z ) x ) ( ( $\lambda$x.x x x ) ( $\lambda$x.x x x ) )  x
+    
+    aplicación
+    en el parámetro mas externo: x libre
+	en la función:
+    tengo otra aplicación    
+    aplicación izquierda 
+    
+    x ligada, y libre, z ligada
+    aplicación derecha, sus dos abstracciones con x están ligadas (cada x a su lambda)
+  
+\end{enumerate}
+ 
+\section*{Notas de las practicas}
+
+\begin{itemize}
+\item Jamas puedo hacer un cambio de variable en una variable libre.
+\item Si no tengo variables libres en el parámetro no es necesario un cambio de variable
+\item No hacer cambios de variables de mas, es para ver si entendimos el concepto.
+\item Orden normal, si el parámetro se puede llegar a reducir, lo meto sin reducirlo. 
+\item Orden aplicativo (lazy evaluation), el parámetro lo puedo reducir? Si, lo reduzco - Puedo reducir el cuerpo de mi función? Si, reduzco cuerpo y parámetro y vuelvo a escribir.
+\item No ver los ordenes como \textit{la mas interna etc}, usar lo mencionado arriba para evitar equivocaciones.
+\item Siempre empezar identificando variables libres y ligadas, es para ver donde hago el remplazo.
+\item Si ambas formas llegan a un resultado, tiene que ser el mismo.
+\item Evaluo de izquierda a derecha.
+\item Si hay mas de un paréntesis a la izquierda, el resto esta de mas. Se borran.
+\item Solo se puede hacer cambio de variable a las variables ligadas al lambda. Nunca cambiar lo que esta entrando.
+\end{itemize}
+
+

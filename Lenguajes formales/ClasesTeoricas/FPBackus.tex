@@ -1,0 +1,107 @@
+\section{FP John Backus}
+Es un lenguaje funcional propuesto por Backus.
+
+Consiste en 5 partes
+\begin{itemize}
+\item Conjunto O de Objetos
+\item Una operación, la Aplicación
+\item Un conjunto F de funciones  f que convierten objetos en otros objetos
+\item Un conjunto FF de formas funcionales que combina funciones u objetos en nuevas funciones en F.
+\item Un conjunto D de definiciones de funciones de F.
+\end{itemize}
+
+
+Las funciones se pueden definir en cualquier orden, mientras que estén cargadas en el ambiente funcionan.
+
+Todas las funciones son de aridad 1, pero este argumento puede ser un conjunto de datos.
+
+Backus quería paralelismo, que no este establecido como es el orden del resultado final, que pueda realizar cosas a la vez. (Liberarnos del estilo de Von Neumann) (El id se utiliza mucho para aprovechar esto.)
+
+\subsection*{Objetos}
+Un objeto puede ser:
+\begin{itemize}
+\item un átomo, una cadena no nula de caracteres (letras, dígitos), excluyendo los símbolos de la notación FP.
+\item una secuencia $<x_1,\ldots,x_n>$ donde cada elemento $x_i$ es un objeto.
+\item un indefinido ($ \perp $), representan una situación no computable. \textit{Ej. 1 dividido 0} \textit{El interprete usado en la materia no lo tiene.}
+\end{itemize}
+
+
+Un átomo $\emptyset$ representa la secuencia vacía, y es el único objeto que es a la vez átomo y secuencia.
+
+Los átomos T y F se usan para representar verdadero y falso.
+
+Si una secuencia contiene el indefinido esta indefinida. $<1,6, A,\perp ,8> = \perp$
+
+Van en cursiva.
+
+
+\subsection*{Aplicación}
+\begin{itemize}
+\item Si f es una función y x es un objeto, entonces f : x es una aplicación y representa el objeto que resulta cuando se le aplica f a x. f es el operador y x el operando.
+\item Cualquier función aplicada a indefinido da indefinido.
+\end{itemize}
+
+
+
+\subsection*{Funciones}
+\begin{itemize}
+\item Preservan el indefinido al recibirlo.
+\item Todas las funciones tienen aridad 1.
+\end{itemize}
+
+Algunas funciones son:
+\begin{itemize}
+\item Para acceder a posiciones usar el numero. \textit{Ej. 2 : <A,B,C>} da B. Si queremos desde la derecha agregamos una r a la derecha del numero.
+\item tl: tail left, devuelve la secuencia sin el primero
+\item tlr da la cola desde la derecha
+\item id es la función identidad (devuelve lo recibido)
+\item atom pregunta si un objeto es un átomo.
+\item eq para igualdad.
+\item null para saber si es vació.
+\item Se pueden realizar las operaciones aritméticas y lógicas (estas ultimas escritas \textit{or, and, not})
+\item length da la longitud.
+\item reverse invierte una secuencia
+\item trans transpone la secuencia de secuencias
+\item distl o distr distribuye desde uno de los lados al resto
+\item apndl o apendr para concatenar
+\item rotr o rotl para rotar una secuencia
+\end{itemize}
+
+
+\subsection*{Formas funcionales}
+Con estas podemos construir funciones y operaciones mas complejas.
+
+\begin{itemize}
+\item Podemos componer funciones con o
+\item Construir varias funciones que se van a aplicar a losa objetos entre $[ f1, f2, fn ]$.
+\item Podemos establecer condiciones: \textit{Ej. (not o atom $\rightarrow$ 1; id) : <A, B, C> resulta en A }
+\item Si queremos usar constantes les agregamos una barra arriba.
+\item Si queremos insertar una función entre objetos de una secuencia usamos la barra (/) a la izquierda de la función. (actúa como en APL)
+\item Para aplicar una función a todos los elementos de una secuencia se utiliza el $\alpha$ (en el interprete de la materia es @)
+\end{itemize}
+
+
+\subsection*{Definición de funciones}
+Es el conjunto de funciones que vamos definiendo. Algunos ejemplos son iota, factorial, producto interno, etc.
+
+
+
+
+
+% Def maximo = > º [1, 2] -> 1; 2
+% se podia evitar el comienzo:  Def maximo = > -> 1; 2 - si le pasamos algo que no es de longitud 2 tira un error
+% maximo : <4 5>
+% 5
+% Def maxsecuencia = /maximo
+% maxsecuencia : <4 6 8 3 9 1>
+% 9
+% primer atomo
+% primatom : <<a> <3 5> 3 <f> 7>
+% 3
+% Def primatom = atom º 1 → 1; primatom º tl ----- es recursivo
+% sin recursividad: Def primatom = /(atom o 1 -> 1; 2) ----- si no hay atom devuelve el ultimo, no estaria correcto
+
+% Def primaux = /(atom o 1 -> 1; 2)
+% Def primatom = (atom -> id; <>) o primaux
+
+% minimo entre los maximos por fila de una matriz: Def minimax = minsec º @maxsec

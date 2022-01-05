@@ -1,0 +1,283 @@
+\subsection{FP Backus}
+
+Notas generales:
+\begin{itemize}
+\item No hay variables!
+\item Hay un solo objeto o ambiente, puede ser una lista, o un átomo, o un indefinido.
+\item Al indefinido, aplicada cualquier función da indefinido.
+\item La idea es ir aplicando funciones que transformen el ambiente en el buscado (otro ambiente).
+\item Para eso tenemos funciones primitivas, formas funcionales (ej. la barra /), o aquellas definidas por el usuario.
+\item El selector se aplica solo a listas (secuencias)
+\item id devuelve el mismo ambiente.
+\item Un predicado siempre devuelve un valor de verdad. (con indefinido devuelve indefinido)
+\end{itemize}
+
+Sobre algunas funciones:
+
+\begin{itemize}
+\item eq necesita una lista con 2 atomos.
+\item null se aplica a una secuencia, nos dice si esta vacia.
+\item not toma un atomo que es verdadero o falso.
+\item distl necesito una lista con 2 elementos, el segundo tiene que ser una secuencia. Junta el primer elemento con cada uno de la secuencia. (distr es a la inversa)
+\item apndl necesita una lista también.
+\item rotl rota la lista, mueve en un lugar cada cosa (lista circular)
+\item Binario y ciclo no los toma
+\item La composición es la forma de unir funciones.
+
+$
+1\ o\ tl : <1\ 2\ 3\ 4>\\
+(<2\ 3\ 4>)\\
+2
+$
+
+\item La construcción junta funciones que quiero aplicar en un mismo ambiente, nos da una secuencia con tantos elementos como grupos de funciones tenga.
+
+$
+[ 1, 5 ,4 ] : <1\ 2\ 3\ 4\ 5>\\
+< <1> <5> <4> >
+$
+
+\item La condición, a la izquierda si o si necesito un predicado
+\item La barra / funciona como una comprensión como en APL, la va metiendo entre cada uno de los elementos de la lista. Simula una especie de recursividad. De derecha a izquierda.
+
+$
+/+ : <1\ 2\ 3\ 4\ 5>\\
++  : <4\ 5>\\
+9\\
++: <3\ 9>\\
+12\\
++:<2\ 12>\\
+14\\
++:<1\ 14>\\
+15
+$
+
+\item El alfa es la aplicación de una función a cada elemento.
+
+$
+@+: < <5\ 6> <7\ 8> <9\ 10> >\\
+<11\ 15\ 19>
+$
+
+\end{itemize}
+
+\subsubsection*{Algunos ejercicios}
+\subsubsection*{1 d) El elemento mínimo entre los máximos por fila de una matriz (minimax).}
+
+\begin{verbatim}
+Def minmax = minsec o @maxsec
+Def maxsec = /max
+Def max = > -> 1; 2
+Def minsec = /min
+Def min = > -> 2; 1
+\end{verbatim}
+
+\subsubsection*{2 a) La pertenencia de un elemento a una secuencia.}
+$ /or\ o\ @eq\ o\ distl : <a\ <b\ a\ c> > $
+
+Otra solución
+\begin{verbatim}
+def pertenece2 = null o 2# -> ~F; /or o alpha eq o distl
+\end{verbatim}
+
+Devuelve falso si es la secuencia vacía
+
+\subsubsection*{3 c) La diferencia de ambas subsecuencias.}
+\begin{verbatim}
+< <1 2 4 5> <3 4 6 > >
+< 1 2 5>
+
+
+Def pertenece = null o 2 -> ~F; /or o @eq o distl
+Def elemento = pertenece -> ~<>;1
+Def eliminarVacios = null o 1 -> 2; apndl
+Def ev = /eliminarVacios o apndr o [id, ~<>]
+Def diferencia = ev o @elemento o distr
+
+<1 2 5 <> 6 <> 7>
+< <1 2 5 <> 6 <> 7> <> >
+<1 2 5 <> 6 <> 7 <> >
+<7 <>>
+<7>
+< <> <7> >
+<7>
+<6 <7> >
+<6 7>
+...
+\end{verbatim}
+
+Hay un solo ambiente que se va modificando.
+
+\subsubsection*{3 a) La unión de ambas subsecuencias.}
+\begin{verbatim}
+< <1 2 3 4> <4 5 6> >
+<1 2 3 4 5 6>
+
+Def unir = pertenece -> 2;apndr
+/unir o apndr o [id, ~<>]
+
+Def union= /auxunion o apndr
+Def auxunion = pertenece -> 2; apnl
+< 1 2 3 4 <4 5 6> >
+<4 <4 5 6> >
+<4 5 6>
+<3 <4 5 6>>
+<3 4 5 6>
+\end{verbatim}
+
+Dos secuencias sin repetición. Si hay repetidos podemos usar un eliminar repetido al final que es similar al eliminar vació (Def union= er o/auxunion o apndr)
+
+
+\subsubsection*{3 b) La intersección de ambas subsecuencias. }
+\begin{verbatim}
+< <1 2 3> <2 3 4> >
+< 2 3>
+
+Def pertenece = null o 2 -> ~F; /or o @eq o distl
+Def elementoInterseccion = pertenece -> 1;~<>
+Def esVacio = null o 1 -> 2; apndl
+Def eliminarVacios = /esVacio o apndr o [id, ~<>]
+Def interseccion = eliminarVacios o @elementoInterseccion o distr
+\end{verbatim}
+
+
+\subsubsection*{14 a)Los equipos invictos. }
+
+\begin{itemize}
+\item Usar la diferencia, los del 3
+\item Transponer
+\item < <IN RO> <IN BO> >
+\item < <....Ganadores> <perdedore> >
+\item Devolver los que ganaron y nunca perdieron
+\item Si transpongo tengo una lista con todos los ganadores y todos los perdedores. Le saco una diferencia y tengo los que ganaron y nunca perdieron.
+\end{itemize}
+
+\begin{verbatim}
+Def pertenece = null o 2 -> ~F; /or o @eq o distl
+Def elemento = pertenece -> ~<>;1
+Def esVacio = null o 1 -> 2; apndl
+Def eliminarVacios = /esVacio o apndr o [id, ~<>]
+Def diferencia = eliminarVacios o @elemento o distr
+Def esIgual = pertenece -> 2; apndl
+Def eliminarRepetidos = /esIgual o apndr o [id, ~<>]
+Def invictos = eliminarRepetidos o diferencia o trans
+\end{verbatim}
+
+
+
+\subsubsection*{14 b) Los que siempre perdieron}
+
+\begin{verbatim}
+Def pertenece = null o 2 -> ~F; /or o @eq o distl
+Def elemento = pertenece -> ~<>;1
+Def esVacio = null o 1 -> 2; apndl
+Def eliminarVacios = /esVacio o apndr o [id, ~<>]
+Def diferencia = eliminarVacios o @elemento o distr
+Def invictos = eliminarRepetidos o diferencia o reverse o trans
+
+otra opcion
+Def perdedores = er o diferencia o [2, 1] o trans
+
+
+Def agregar = apndr o [id, ~<>]
+Def elimrepetidos = /(pertenece -> 2; apndl) o agregar
+Def fdif = (@ (pertenece -> ~<>; 1)) o distr
+Def diff = elimrepetidos o eliminarVacios o fdif
+\end{verbatim}
+
+% Def pertenece = null o 2 -> ~F; /or o @eq o distl
+% Def valorPertenece = pertenece -> 1; ~<>
+% Def eliminarVacio = null o 1 -> 2; apndl
+% Def interseccion = /eliminarVacio o apndr o [id, ~<>] o @valorPertenece o dist
+
+
+\subsubsection*{8) Definir el producto de un escalar por una matriz}
+
+Queremos:
+\begin{verbatim}
+< 4 < <1 2 3> <4 5 6> <7 8 9> > >
+<< 4 8 12> <16 20 24> < 28 32 36>>
+
+< 4 < <1 2 3> <4 5 6> <7 8 9> > >
+<  < 4 <1 2 3>> <4 <4 5 6>> <4 <7 8 9>> >
+<  < <4 1> <4 2> <4 3>> < <4 4> <4 5> <4 6>> < <4 7> <4 8> <4 9>> >
+<< 4 8 12> <16 20 24> < 28 32 36>>
+
+Def multilist = (@ *) o distl
+Def productoEscalar = @multilist o distl
+
+productoEscalar : <2, <<1 2 3> <4 5 6> <7 8 9>>>
+\end{verbatim}
+
+
+\subsubsection*{Ej Dada una secuencia donde el primero es un numero y el segundo la lista, usar el numero como selector. (Si se pasa devolver vació)}
+\begin{verbatim}
+<3 < a b d f>>
+d
+
+Def iota = auxiota o [~1, id, ~<>]
+Def auxiota = (> o [1, 2] -> 3; auxiota o [+ o [1, ~1], 2, apndr o [3, 1]])
+
+Def selector = 2 o 1r o trans o [iota o 1, 2]
+
+[iota o 1, 2] da <<1 2 3> <a b c d>>
+\end{verbatim}
+
+Al transponer quedan los pares, agarramos el ultimo desde la derecha (una lista, por ejemplo $<3\ d>$) y de ahí agarramos el elemento.
+
+Nota: al transponer si no son del mismo tamaño es indefinido. (depende de la implementación, en el interprete funciona)
+
+
+Otra forma es con [1 trans o [iota o len, 2]] agregando un pertenece.
+
+\begin{verbatim}
+<3 << 1 a > <2 b > <3 d> <4 c> >
+< 3 <1 a>> <3 <2 b>> <3 <3 d> ....>
+distl
+@pertenece
+< <> <> d <> >
+/eliminarVacios
+\end{verbatim}
+
+\subsubsection*{Ej Dados dos elementos devolver la cantidad de veces que se encuentra el primer átomo en la segunda lista.}
+
+\begin{verbatim}
+< a  < a  g h a j a> >
+3
+
+
+Def transformar = eq -> ~1; ~0
+Def contar = /+ o @transformar o distl
+
+distl
+< <a  a> <a g> <a h> <a a> <a j> <a a> >
+@transformar
+< 1 0 0 1 0 1 >
+\end{verbatim}
+
+
+\subsubsection*{14 c) Los que ganaron más veces de las que perdieron}
+
+\begin{verbatim}
+ganaronMas : < <IN BO> <IN RI> <BO RI> <BO SA> >
+<IN BO>
+\end{verbatim}
+
+Queremos una lista con $<\ < Equipo\ Ganados\ Perdidos>\ ...>$ para poder resolver lo pedido.
+
+\begin{verbatim}
+Def union= /auxunion o apndr
+Def auxunion = pertenece -> 2; apndl
+
+Def ganadores = @ 1
+Def perdedores = @ 2
+Def listaEquipos = eliminarRepetidos o union o [ganadores, perdedores]
+
+Def contarResultados = @[1, contar o [1,1 o 2], contar o [1,2 o 2]] o distl o [listaEquipos, trans o id]
+
+Def comparar = eq [2, 3] -> 1 ; ~<>
+
+Def filtrar = > o [2, 3] ->  1;~<>
+
+Def ganaronMas = eliminarVacios o @filtrar o contarResultados
+\end{verbatim}

@@ -1,0 +1,62 @@
+\section{APL}
+\begin{itemize}
+\item Principios de la década del 60.
+\item Primeros lenguajes funcionales. Empezó como una notación.
+\item Tienen 7 características en común como mínimo los lenguajes funcionales.
+\item Tiene caracteres especiales que representan las funcionalidades. Se pueden resolver problemas de matemática con muy poco código.
+\item Se puede probar en \href{https://tryapl.org/}{TryAPL}.
+\end{itemize}
+
+\subsection*{Elementos}
+La gramática tiene 6 elementos (como mínimo). Un solo símbolo ya cambia completamente el significado del programa.
+\begin{itemize}
+\item \textbf{Sustantivos}: es un arreglo de rango 0 (escalar o item), de rango 1 (vector o lista), o mayor o igual a 2 (matriz tabla). Son los datos básicamente. Para las matrices le digo de cuanto por cuanto es la matriz.
+\item \textbf{Verbos}: Un verbo es aplicado a un sustantivo, es una función que actúa sobre uno (monódica) o dos sustantivos(diádica) (llamados argumentos). Produce un nuevo sustantivo. Se identifica con un símbolo. \textit{Ejemplos con argumentos: 1) $-4 \ $ cambia signo ;2)$\ 2-4$ realiza una resta ;3) $\iota3 \ $} (Un argumento a la izquierda, el otro a la derecha)
+\item \textbf{Adverbios}: es un operador que cambia el significado del verbo, los vuelve verbos derivados. \textit{Por ejemplo: $/$ reduce, $+/$ suma todo lo que venga a la derecha.}
+\item \textbf{Conjunciones}: Es un operador que actúa sobre dos verbos (funciones) y produce un nuevo verbo derivado (función de orden superior).
+\item \textbf{Ligamientos} (\textbf{copulas}): Se denota con $\leftarrow$. Permite asignar un elemento gramatical (sustantivo, verbo, etc) en una variable. Entre llaves va una función, es una función anónima. Quiere decir que sus argumentos pueden ser dos como mucho, alfa $ \alpha $ entra por la izquierda, y omega $\omega$ por la derecha. Con una copula las asignamos para usarlas varias veces.
+\item \textbf{Puntuación}: La única puntuación son los paréntesis. Están para forzar un orden de evaluación distinto del predeterminado (las expresiones de APL se leen de derecha a izquierda va aplicando los verbos sobre los sustantivos).
+\end{itemize}
+
+\subsection*{Particularidades}
+\begin{itemize}
+\item Los tipos no se declaran, se asocian a lo mas cercano que tienen.
+\item El orden de evaluación es de derecha a izquierda. Todos los verbos tienen igual prioridad.
+\item Resultado de un ligamento, es el valor de su parte derecha
+\item La selección de items de un arreglo se realiza con $[$ y $]$ dentro de los cuales se colocan los arreglos de posiciones correspondientes a cada dimensión del arreglo (separados por ;). \textit{'ABC'\ $[$3\ 2\ 1$]$ resulta 'CBA'}
+\item Los tipos de los argumentos de las funciones diádicas pueden ser iguales o distintos. \textit{Si son dos escalares, el resultado es otro escalar. Si son un escalar y un arreglo, el resultado es un arreglo con los resultados de aplicar la función diádica entre el escalar y cada uno de los ítems del arreglo. Si son dos arreglos de igual dimensión, el resultado es un arreglo con los resultados de aplicar la función diádica entre los elementos homólogos de ambos arreglos. Si son dos arreglos de distintas dimensiones, el resultado puede ser indefinido o no, dependiendo de la función.}
+\item Los vectores empiezan con 1, no con 0.
+\item Los identificadores identifican una sola cosa a la vez, se van pisando.
+\end{itemize}
+
+
+
+\section{Programación Funcional}
+Tipo de programación declarativa, mas énfasis en la evaluación de expresiones.
+
+Tiene 7 características principales.
+\begin{itemize}
+    \item \textbf{Programas como funciones}: Un conjunto de funciones constituyen un programa, y la ejecución consiste en aplicar los argumentos a las funciones.
+    \item \textbf{Funciones Puras}: Responsabilidad del programador, uso del APL. Ante los mismos argumentos siempre retorna el mismo valor, conlleva la transparencia referencial (la función puede reemplazarse por su retorno). Además, no debe de tener efectos colaterales, no hay efectos visibles sobre el ambiente desde la cual se invoca (\textit{Con entrada salida ya no es pura}).
+    \item \textbf{Datos inmutables}: Las funciones reciben y devuelven cosas, no modifican lo que reciben. (Son persistentes, esto facilita la programación concurrente). En FP no hay variables, por lo que no podemos verlo.
+    \item \textbf{Funciones de primera clase}: Tiene que ser tratada como otro tipo de dato. Tienen los mismos derechos que las demás entidades del lenguaje. Todas las funciones son de este tipo. \textit{Si a un numero lo puedo guardar en una variable, a una función también.}
+    
+    En FP pueden ser recibidas y retornadas en determinados contextos.
+    
+    \item Funciones de orden superior: Son capaces de recibir a otras funciones o retornar otra función. Solo algunas son de este tipo. (\textit{Las típicas son: map, reduce, bind})
+    
+    
+    \textit{Paper recomendado: Revenge of the nerds - Lisp - Paul Graham}
+    \item Composición de funciones: Armar funciones mas complejas a partir de mas simples.
+    En FP esta el circulo para componer.
+    
+    \item Recursividad: No es propia exclusiva de la programación funcional. \textit{Si bien se puede resolver de primera de esta forma en la materia, hay que pensar la forma de refactorizar para llevarlo a funciones de orden superior.} Fijarse de si es posible la recursividad de cola.
+\end{itemize}
+
+\subsection*{Currificacion - Currying}
+
+\begin{itemize}
+    \item APL no lo tiene.
+    \item Curry, convierte una función que recibe varios argumentos en una que recibe menos argumentos, la cual puede invocarse con menos, y si fuera necesario devuelve otra función que espera los argumentos faltantes. \textit{Función curry}
+    \item Es posible realizarlo directamente en la definición.
+\end{itemize}

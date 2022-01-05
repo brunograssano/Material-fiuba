@@ -1,0 +1,99 @@
+\documentclass[titlepage,a4paper]{article}
+
+\usepackage{a4wide}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue,bookmarksopen=true]{hyperref}
+\usepackage{bookmark}
+\usepackage{fancyhdr}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{float}
+
+\usepackage{minted}
+
+
+\usepackage{enumitem} %cambiar tipo de ordered list
+\usepackage{amsmath} % ecuaciones
+
+\pagestyle{fancy} % Encabezado y pie de página
+\fancyhf{}
+\fancyhead[L]{Apuntes Lenguajes Formales - BG}
+\fancyhead[R]{2C 2021}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyfoot[C]{\thepage}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+\begin{titlepage} % Carátula
+	\hfill\includegraphics[width=6cm]{logofiuba.jpg}
+    \centering
+    \vfill
+    
+    \includegraphics[width=6cm]{img/lambda.png}
+    
+    \Huge \textbf{Apuntes}
+    
+    \Huge \textbf{Lenguajes Formales}
+    \vskip2cm
+    \Large [75.14/95.48]\\
+    2C 2021 
+    \vfill
+    \begin{tabular}{ | l | } % Datos del alumno
+      \hline
+      Grassano, Bruno \\ \hline
+      bgrassano@fi.uba.ar \\ \hline
+  	\end{tabular}
+    \vfill
+    \vfill
+\end{titlepage}
+
+\tableofcontents % Índice general
+
+\newpage
+
+\section{Introducción}\label{sec:intro}
+El presente archivo contiene los apuntes que fueron tomados a lo largo de la cursada de la materia Lenguajes Formales (75.14/95.48).
+
+La materia es bastante tranquila y muy recomendable para aprender programación funcional. Durante la cursada se tiene un parcial (virtual es oral de media hora donde se cubren todos los temas), y un TP más cerca del final del cuatrimestre. En el TP se implementa un interprete de algún lenguaje, conviene empezarlo con tiempo. (Este cuatrimestre toco de Scheme) Pasada la cursada el final consiste en agregarle alguna característica al interprete realizado en el TP.
+
+\newpage
+\section*{Primera y segunda semana}
+%parciales orales
+%interprete de scheme, derivado de lisp
+
+% CAR primer elemento de una lista - CDR devuelve todo menos el primero (segundo elemento) - en scheme el Nil es '()
+\input{ClasesTeoricas/CalculoLambda}
+
+\newpage
+\section*{Tercera y cuarta semana}
+\input{ClasesTeoricas/APL}
+
+\newpage
+\section*{Quinta y sexta semana}
+\input{ClasesTeoricas/FPBackus}
+
+\newpage
+\section*{Séptima semana (en adelante)}
+\input{ClasesTeoricas/Clojure}
+
+\newpage
+\section{Practica}
+\input{ejercicios/calculoLambdaEjercicios}
+
+\newpage
+\input{ejercicios/aplEjercicios}
+
+\newpage
+\input{ejercicios/FPEjercicios}
+
+\newpage
+\input{ejercicios/ClojureEjercicios}
+
+\newpage
+\section{Bibliografía}
+
+Apuntes otorgados por la cátedra, los mismos se pueden encontrar \href{https://campus.fi.uba.ar/mod/page/view.php?id=108751}{aquí}.
+
+
+\end{document}

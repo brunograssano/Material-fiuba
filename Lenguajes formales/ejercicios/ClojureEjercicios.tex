@@ -1,0 +1,585 @@
+\subsection{Clojure}
+\subsubsection*{Notas}
+\begin{itemize}
+\item (list) creamos la lista, nos devuelve ()
+\item Todas las funciones de creación son de aridad n, es decir, puedo tener n parámetros al llamar a esa funcion. (list 'a 'b 'c)
+\item (pop)
+\item (peek)
+\item (nth)
+\item (defn) para definir funciones
+\item La suma y producto tienen aridad n.
+\item Podemos definir funciones con distinto tipo de aridad.
+\item map, con un parametro aplica la funcion a cada uno de los elementos de ese unico parametro (alfa de FP).
+\item apply desempaqueta el parametro. Llama a la funcion con todos los elementos de la secuencia como parametro.
+\end{itemize}
+
+
+
+\subsubsection*{1) Definir la función tercer-angulo que reciba los valores de dos de los ángulos interiores de un triángulo y devuelva el valor del restante.}
+
+Mostrar error si alguno es negativo o alguno es mayor a 180
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn tercer-angulo [alfa, beta]
+ (cond
+    (< 180 alfa) ( println "Error" )
+    (< 180 beta) ( println "Error" )
+    (neg? alfa) ( println "Error" )
+    (neg? beta) ( println "Error" )
+    :else ( - 180  (+ alfa beta))
+ )
+)
+\end{minted}
+
+\subsubsection*{2) Definir la función segundos que reciba los cuatro valores (días, horas, minutos y segundos) del tiempo que dura un evento y devuelva el valor de ese tiempo expresado solamente en segundos.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn a-segundos [dias, horas, minutos, segundos]
+
+      (cond
+        (neg? dias) ( println "Error" )
+        (neg? horas) ( println "Error" )
+        (neg? minutos) ( println "Error" )
+        (neg? segundos) ( println "Error" )
+        :else (+ (* dias 86400) (* horas 3600) (* minutos 60) segundos)
+
+        )
+      )
+\end{minted}  
+      
+\subsubsection*{3) Definir la función sig-mul-10 que reciba un número entero y devuelva el primer múltiplo de 10 que lo supere.}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn sig-mul-10 [n]
+      (cond
+        (= 0 (rem n 1)) ( println "No es entero" )
+        (neg? n) (* 10 (quot n 10) )
+        (= n 0) 10
+        :else (* 10 (+ (quot n 10) 1))
+      )
+  )
+\end{minted} 
+
+\subsubsection*{5) Definir la función capicua? que reciba un número entero no negativo de hasta 5 dígitos y devuelva true si el número es capicúa; si no, false.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn capicua? [n]
+    (let [unidades (rem n 10),
+          decenas (rem (quot n 10) 10),
+          centenas (rem (quot n 100) 10),
+          unidades-mil (rem (quot n 1000) 10),
+          decenas-mil (rem (quot n 10000) 10)]
+
+         (cond
+           (= 0 (rem n 1)) ( println "No es entero" )
+           (neg? n) (println "Es negativo")
+           (< n 10) true
+           (< n 100) (= unidades decenas)
+           (< n 1000) (= unidades centenas)
+           (< n 10000) (and (= unidades unidades-mil) (= decenas centenas))
+           :else (and (= unidades decenas-mil) (= decenas unidades-mil))
+           )
+     )
+)
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn capicua? [n]
+  (cond
+    (not (integer? n)) (println "El numero tiene que ser un entero")
+    (neg? n) (println "El numero tiene que ser un negativo")
+  :else
+    (= (reverse (str n)) (seq (str n)))
+  )
+)
+
+(println (capicua? 12334578))
+\end{minted}
+
+\subsubsection*{8) Definir la función nth-fibo que reciba un número entero no negativo y devuelva el correspondiente término de la sucesión de Fibonacci.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn nth-fib [n]
+      (cond
+        (not (integer? n)) (println "No es entero")
+        (neg? n) (println "Es negativo")
+        (zero? n) 0
+        :else (fib-rec (- n 1) 0 1)
+        )
+    )
+
+(defn fib-rec [n, anterior, acumulado]
+      (cond
+        (zero? n) acumulado
+        :else (fib-rec (- n 1) acumulado (+ anterior acumulado))
+        )
+      )
+\end{minted}
+ 
+Con múltiple aridad:
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn nth-fibo 
+    ([n] 
+        (cond
+    	    (neg? n) nil 
+    	    (zero? n) 0 
+    	    (= n 1) 1 
+    	    :else(nth-fibo 0 1 2 n)
+    	) 
+	)
+    ([f1 f2 cont n] 
+        (if (= cont n) 
+            (+ f1 f2) 
+            (nth-fibo f2 (+ f1 f2) (inc cont) n)
+        )
+    )
+)
+\end{minted}
+
+\subsubsection*{9) Definir la función cant-dig que reciba un número entero y devuelva la cantidad de dígitos que este tiene.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn cant-dig [n]
+    (cond
+      (not (integer? n)) (println "No es entero")
+      :else (count (seq (str n)))
+      )
+)
+\end{minted}
+
+De forma recursiva:
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn contar-dig [n] (if (zero? n) 0 (inc (contar-dig (quot n 10)))))
+\end{minted}
+
+
+\subsubsection*{11) Definir la función digs que reciba un número y devuelva una lista con sus dígitos.}
+
+El map ya nos da la lista.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+
+(defn abs [n]
+    (cond
+        (< n 0) (* -1 n)
+        :else n
+    )
+)
+
+(defn digs [N]
+    (println (map {\0 0 \1 1 \2 2 \3 3 \4 4 \5 5 \6 6 \7 7 \8 8 \9 9} (str (abs n))))
+)
+\end{minted}
+
+\subsubsection*{12) Definir la función repartir que, llamada sin argumentos, devuelva la cadena "Uno para vos, uno para mí". De lo contrario, se devolverá una lista, en la que habrá una cadena "Uno para X, uno para mí" por cada argumento X}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure} 
+(defn uno-para [s] 
+  (str "Uno para " s ", uno para mí")
+)
+
+(defn repartir
+  ([] (uno-para "vos"))
+  ([& more] (map uno-para more))
+)
+\end{minted}
+
+
+
+\subsubsection*{13) Definir una función para producir una lista con los elementos en las posiciones pares de dos listas dadas.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn pares [unaLista otraLista]
+    (map second (concat (partition 2 unaLista) (partition 2 otraLista) ) )
+)
+
+
+\end{minted}
+
+(partition 2 '(1 2 3 4 5 6 7))
+((1 2) (3 4) (5 6))
+
+\subsubsection*{17) Definir una función para obtener el elemento central de una lista.}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn central [lista]
+    (nth lista (/ (count lista) 2))
+)
+
+\end{minted}
+
+Modificado:
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+(defn obtenerElementoCentral[lista]
+    (cond
+        (odd? (count lista)) (nth lista (/ (count lista) 2))
+        :else (
+            list (nth lista (- (/ (count lista) 2) 1) ) (nth lista (/ (count lista) 2) ) 
+            )
+    )
+)
+\end{minted}
+
+\subsubsection*{23) Definir una función para transponer una lista de listas}
+
+Devuelve una función de menor aridad que la indicada como primer argumento, ya que los
+demás argumentos se utilizan (“se fijan”) en la función recibida.
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn transponer [listas]
+    (apply map list listas)
+)
+
+(println (transponer '((1 2 3) (4 5 6))))
+(println (transponer '((a b c d e) (1 2 3 4 5) (z x y u v))))
+
+\end{minted}
+
+Aplica map list a cada una de las listas de la función, lo transforma como una función
+Apply los manda como parámetros independientes
+map list ejecuta list entre cada uno de los elementos que tenemos (primeros, segundos, etc)
+
+
+
+\subsubsection*{21) Definir una función para obtener la matriz triangular superior (incluyendo la diagonal principal) de una matriz cuadrada que está representada como una lista de listas.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn poner-ceros [listas actual]
+    (concat 
+        listas
+        (list (into (nthnext actual (count listas) ) (repeat (count listas) 0)))
+    )
+)
+
+(defn triangular-superior [listas] 
+    (cond
+        (empty? listas) (println "No se tienen listas")
+        :else (reduce poner-ceros '() listas)
+    )
+)
+
+\end{minted}
+
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn poner-ceros ([lista cant-ceros] 
+        (poner-ceros lista cant-ceros 0)
+    )
+    ([lista cant-ceros pos-actual]
+        (cond 
+            (= pos-actual cant-ceros) lista
+            :else 
+                (recur
+                    (apply list (assoc (vec lista) pos-actual 0))
+                    cant-ceros
+                    (inc pos-actual)
+                )
+        )
+    )
+)
+
+(defn triangular-rec [listas actual acumulado]
+    (cond
+        (= actual (count listas)) acumulado
+        (zero? actual) (triangular-rec listas 1 (list (nth listas actual) )  )
+        :else (recur listas (inc actual)
+              (concat acumulado (list (poner-ceros (nth listas actual) actual))) )
+    )
+)
+
+(defn triangular-superior [listas] 
+    (cond
+        (empty? listas) (println "No se tienen listas")
+        :else (triangular-rec listas 0 '() )
+    )
+)
+
+\end{minted}
+
+\subsubsection*{22) Definir una función para obtener la diagonal principal de una matriz cuadrada que está representada como una lista de listas.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn poner-ceros [listas actual]
+    (concat 
+        listas
+        (list (into (nthnext actual (count listas) ) (repeat (count listas) 0)))
+    )
+)
+
+(defn triangular-superior [listas] 
+    (cond
+        (empty? listas) (println "No se tienen listas")
+        :else (reduce poner-ceros '() listas)
+    )
+)
+
+\end{minted}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn diagonal-rec [listas actual acumulado]
+    (cond
+        (= actual (count listas))  (reverse acumulado)
+        :else (recur listas 
+                     (inc actual)
+                     (conj acumulado (nth (nth listas actual) actual) )
+              )
+    ) 
+)
+
+(defn diagonal [listas] 
+    (cond
+        (empty? listas) (println "No se tienen listas")
+        :else (diagonal-rec listas 0 '() )
+    )
+)
+
+\end{minted}
+
+% examenes individuales 20 min
+% una pregunta o ej de cada tema
+% los que hicimos de TPs los tenemos que saber si o si y poder mostrarlo
+% puede haber alguno con alguna variacion o pregunta conceptual (como seria por orden normal o aplicativo en calculo lambda)
+% mar 16-19
+% mier 19-23
+% ju 19-23
+
+
+
+% mar - 16 - 16:20 - 17 - 17:20 - 17:40 - 18 - 18:20 - 18:40 - 
+% mier - ?16:40?  - 17 - 17:20 - 18 - 18:20 - 18:40 - 19 - 19:20 - *19:40* - 20 -  - 20:40 -  - 21:20 - 21:40 - 22 - 22:20 - 22:40
+% ju - 17 - 17:20 - 17:40 - 18 - 18:20 - 18:40 - 19 - 19:20 - - 20 - 20:20  - 21 - 21:20 - 21:40 - 22 - 22:20
+
+% tener a mano los 4 interpretes
+
+% tener camara
+
+\subsubsection*{36) Definir la función sublist que devuelva la sublista correspondiente a una lista, una posición inicial y una longitud dadas.}
+
+Por ejemplo:
+(sublist '(A B C D E F G) 3 2) -> (C D)
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn sublist [lista pos-inicial longitud]
+    (take longitud (drop pos-inicial lista))
+)
+
+\end{minted}
+
+\subsubsection*{35) Definir las funciones filas-max-V y mas-V-o-F que, aplicadas a una matriz de V y F (una lista de listas con los valores V y F), devuelvan, respectivamente:}
+
+a) El/los número/s de la/s fila/s en la/s que la cantidad de V es máxima, por ejemplo:
+
+% map-index - devuelvo num de fila o vacio, y elimino vacio
+
+(filas-max-V '((V F V V F)(V V F V V)(F F F V F)(V V V F V))) --> (2 4)
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn contar-V [index lista]
+    (cond
+        (> (get (frequencies lista) 'V) (get (frequencies lista) 'F)) index
+        :else nil
+    )
+)
+
+(defn filas-mas-V [listas]
+    (remove nil? (map-indexed contar-V listas))
+)
+
+\end{minted}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn contar-V [maximo lista]
+    (cond
+        (> (get (frequencies lista) 'V) (get (frequencies maximo) 'V)) lista
+        :else maximo
+    )
+)
+
+(defn filas-max-V [listas]
+    (reduce contar-V listas )
+)
+
+\end{minted}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{clojure}
+
+(defn contar-Vs [fila] (reduce + (replace '{V 1, F 0} fila)))
+
+(defn hallar-max [lista] (reduce max lista))
+
+(defn cantidad-de-Vs [m] (map contar-Vs m))
+
+(defn indices-de-max [lista maximo]
+    (map * (map #(if (= maximo %) 1 0) lista) (range (count lista))))
+
+(defn filas-max-V [m] 
+    (map inc 
+        (filter pos? 
+            (indices-de-max 
+                (cantidad-de-Vs m)
+                (hallar-max (cantidad-de-Vs m))
+            )
+        )
+    )
+)
+
+\end{minted}
+
+% 2 mails
+
+
+
+
+
