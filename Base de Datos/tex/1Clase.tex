@@ -1,0 +1,363 @@
+\section{Introducción a bases de datos}
+
+Palabras clave: lugar, datos, persistente, datos interrelacionados (que provienen de un cierto universo en común, tienen relaciones)
+
+\noindent\rule{\textwidth}{0.5pt}
+
+Definición: Una base de datos es un conjunto de datos interrelacionados.
+
+\medskip
+
+Definición: Un dato es un hecho que puede ser representado y almacenado de alguna forma, y que tiene un sentido implícito. 
+Lo puedo codificar de alguna forma, no es algo abstracto
+
+\noindent\rule{\textwidth}{0.5pt}
+
+
+\section{Bases de datos tradicionales vs. no tradicionales}
+
+\noindent\rule{\textwidth}{0.5pt}
+
+Definición: El predicado es una función que toma uno o mas argumentos y devuelve un valor de verdad.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\subsubsection*{Ejemplos}
+\begin{itemize}
+\item La mesa 5 consumió 2 milanesas napolitanas y 1 botella de vino
+\item 100 gramos de chocolote poseen 546 calorias
+\end{itemize}
+
+\smallskip
+
+Todas las oraciones van a tener un sujeto, verbo y predicado.
+
+\smallskip
+
+Las bases de datos almacenan proposiciones
+\begin{itemize}
+\item Juan gano x en 2012
+\item Martin gano x en 2015
+\end{itemize}
+
+Todas tienen la misma estructura, se pueden tipificar en un predicado al tener la misma estructura. Podemos separar el nombre, el x, y el año.
+
+Puedo definir una función, que tome como variable las cosas en común que identificamos antes y devuelva Verdadero o Falso de acuerdo a la entrada. Las bases de datos solo almacenan proposiciones verdaderas. Toma determinados predicados, y guarda aquellos que son verdaderos. Estas son las bases de datos \textbf{tradicionales}.
+
+\smallskip
+
+Actualmente las bases de datos pueden almacenar datos mas complejos ahora. \textit{Imágenes, audio, vídeos, etc} Estas son del tipo base de datos \textbf{no tradicional}.
+
+\medskip
+
+\textit{Lectura recomendada: \href{https://www.dcs.warwick.ac.uk/~hugh/M359/What-a-Database-Really-Is.pdf}{What a database really is: Predicates and propositions}}
+
+
+\section{Sistemas de gestión de bases de datos}
+Surge para evitar tener que rehacer los programas cada vez que cambiaba la base de datos. Se hizo evidente que la relación directa entre los programas y los datos es una gran desventaja. Por lo que aparece el gestor como punto intermedio
+
+\noindent\rule{\textwidth}{0.5pt}
+
+Definición: Es un conjunto de programas que gestiona y controla la creación, manipulación y acceso a la base de datos. Es una abstracción entre los programas y la base de datos.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\smallskip
+
+Independencia de datos: Es la propiedad del SGBD consistente en que los cambios en la estructura de la base de datos no repercutan en los programas o sistemas de información que utilizan.
+
+
+\subsection*{Funciones de los SGBDs}
+\begin{itemize}
+\item Abstracción
+\item Almacenamiento y operaciones
+\begin{itemize}
+ \item ofrecer estructuras eficientes
+ \item ofrecer un lenguaje de consulta, una herramienta para manejarlo \end{itemize}
+\item Seguridad: evitar accesos no autorizados
+\item Integridad: asegurar que la base queda integra (asegurar los datos a través de restricciones). \textit{Registrar un director al agregar una película que nunca existió}
+\item Consistencia:  accesos concurrentes por múltiples usuarios
+\item Recuperación: ofrecer herramientas para la recuperación ante fallas, usan un archivo de log, donde todo lo que hace el usuario queda registrado, de forma tal de que si pasa algo, se pueda recuperar
+\item soporte transaccional: que permita trabajar con transacciones, se realiza por completo la acción o no.
+\end{itemize}
+
+
+
+
+\section{Arquitectura de 3 capas ANSI/SPARC}
+
+El ANSI/SPARC propuso una arquitectura de 3 niveles de abstracción para la descripción de una base de datos. Esta representación asegura la independencia.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/3capas.PNG}
+    \caption{Modelo de 3 capas}
+\end{figure}
+
+
+\subsubsection*{Modelo interno}
+Representa la forma en que los datos se almacenan usando estructuras de datos.
+
+\subsubsection*{Modelo conceptual}
+Describe la semántica de los datos abstrayéndose de su implementación física. Entidades, tipos de datos, operaciones restricciones de seguridad. Dice que tipo de cosas represento
+
+\subsubsection*{Modelo externo}
+Representa la forma en que los usuarios perciben los datos
+
+
+\subsection*{Modelo conceptual}
+Describe la semántica de los datos incluyendo sus características.
+
+Un modelo de datos debe incluir:
+\begin{itemize}
+\item Conjunto de objetos, que tienen sus propiedades (atributos) y interrelaciones entre ellos que representa la estructura
+\item Un conjunto de operaciones para manipular los datos
+\item Restricciones sobre los objetos, las interrelaciones y las operaciones
+\end{itemize}
+
+\subsection*{Modelo Entidad-Interrelación}
+
+Esto es un modelo gráfico (Usamos la notación original del modelo de Chen)(diagrama de entidad-interrelación), es una herramienta comunicativa.
+
+\begin{itemize}
+\item Tipo de entidad: es un tipo de clase de objeto en particular. Los tipos de entidad en el diagrama los recuadramos. \textit{Algunos ejemplos: futbolista, país, etc} El recuadro ya indica que tenemos esa entidad en la base de datos. No confundir con las instancias de entidad. \textit{Ej Lionel Messi, Argentina}
+\item Atributo: Es una propiedad que describe a la entidad. Se representan con un circulo y una flecha de la entidad al atributo. \textit{Ej. Futbolista $\rightarrow$ cotización, edad (fecha de nacimiento mejor!), nombre, club, ¿hijos? pensar quien esta pidiendo la base de datos, Asignatura $\rightarrow$ código, nombre, créditos, etc} Los atributos de una entidad tienen que surgir de lo que el cliente nos esta planteando. 
+\item Tipo de interrelación: es la definición de un conjunto de relaciones o asociaciones similares entre dos o mas tipos de entidades.
+Rombo en el medio de la flecha, que indica que tipo es. \textit{Ej.Futbolista -  Nacio en - Pais}. No tenemos algo que indica en que orden leer el verbo.
+\end{itemize}
+
+La 'flecha' de una entidad al atributo que viene a ser otra entidad indica que hay un vinculo.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/diagramaEntidadInterrelacion.PNG}
+    \caption{Ejemplos de diagramas}
+\end{figure}
+
+Cada entidad tendrá valores particulares para cada uno de los atributos. En el diagrama no indicamos que de que tipo son los atributos, lo ponemos en el diccionario.
+
+El conjunto de valores lo podemos ver como una tupla, que surge del producto cartesiano de los dominios de los valores.
+
+\subsubsection*{Valores Nulos}
+\begin{itemize}
+\item Se puede indicar en una tabla si acepta valores nulos o desconocidos
+\item Un valor nula significa que se desconoce un valor de una fila,  por ejemplo no se solicito un dato, o no se cargo migrando de otra tabla. A veces un valor nulo se utiliza para indicar que un dato no tiene valor (cosa distinta a tener valor y desconocerlo). \textit{Ej. Lo podemos usar para indicar que algo esta vigente, que viene de otro país, etc}
+\item Al tener valores nulos, SQL trabaja con una lógica de tres valores, Verdadero, Falso, Nulo/Desconocido.  
+\item Hay que tener cuidado al realizar consultas, ya que los valores nulos se tratan como desconocidos, por lo que las consultas no los incluirían en los resultados. Al momento de evaluarlos devuelve Falso. Se puede arreglar con el operador IS [NULL | NOT NULL]
+\item  Si una columna puede tener valores nulos, la consulta armarla con la lógica de tres valores (usar el operador IS)
+\item  En subconsultas algunos problemas con ellos son mas difíciles de detectar. Los EXISTS e IN no son tan intercambiables, por lo que hay que estar atento en su uso
+\item Cuando se intenta ordenar por una columna que tiene valores nulos, por defecto, los valores nulos se muestran al final. Si queremos cambiar el comportamiento, se agrega NULLS FIRST. Algo parecido ocurre cuando ordenamos descendentemente con DESC, se le puede agregar NULLS LAST
+\item En las funciones de agrupamiento y agregación los nulos por lo general se ignoran. No se suman ni incluyen en el promedio, no se devuelven ni como máximo no como mínimo.
+\item Si queremos que el COUNT los tenga en cuenta, hay que revisar que expresión se esta contando. (El COUNT cuenta filas)
+\item No es una instancia del dominio
+\end{itemize}
+
+\subsubsection*{Atributos compuestos}
+Nos puede interesar a los atributos en atributos mas simples. \textit{Los números de tarjetas de créditos, cada uno representa algo.} Esto lo podemos hacer si es relevante para nuestro negocio.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/tarjetaDeCredito.PNG}
+\end{figure}
+
+\subsubsection*{Atributos multivaluados vs monovaluados}
+\textit{Teléfono y mail de contacto}
+Podemos tener mas de una entidad de estos, se indican con doble borde del circulo de entidad.
+
+\subsubsection*{Almacenados vs derivados}
+\textit{La densidad de población, si tenemos la población y la superficie ya la podemos obtener.}
+Este se indica con un borde del circulo punteado.
+
+\subsubsection*{Conjuntos de entidades}
+Es el conjunto de instancias de un determinado tipo de entidad en un estado determinado de la base de datos. \textit{Por ejemplo con País, la base de datos puede tener cargada los siguientes países: Argentina, Italia, Países Bajos}
+
+\subsubsection*{Restricciones}
+Queremos que toda entidad adentro del diagrama, tenga al menos un valor que siempre van a ser distintos entre si. Lo llamamos atributos claves o identificadores únicos. Si no lo encontramos, debemos crear uno. Estos permiten identificar unívocamente a las entidades. Los identificamos subrayándolos.
+
+Hay una cuestión de minimalidad de la clave. El conjunto tiene que ser minimal, no debe tener ningún \textbf{subconjunto} del mismo que sea capaz de identificar unívocamente a los entidades. Aun así, pueden existir mas de un conjunto de atributos clave para un tipo de entidad. No tiene nada que ver con la longitud.
+
+La propiedad de ser clave no depende del estado actual de la base de datos. Tiene que ser global, respecto de todos los estados posibles de la misma!
+En los exámenes por ahí aparece como clave el nombre, es con fines didácticos solamente.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\subsubsection*{Claves sustitutas}
+Claves sustitutas, artificiales, o "Surrogate Key", no es ni mala ni buena practica. El problema que tiene es que esta clave no existe en el mundo real, por lo que no sabemos si cargamos alguna fila dos veces. Priorizar usar los atributos existentes antes.
+
+Es identificador único para cada registro de la tabla, que no surge de los datos, si no que es independiente de ellos y generado por el sistema. Por lo tanto, es una columna extra que se agrega a la tabla. Se diferencia de las claves naturales, porque las naturales tienen un significado contextual de lo que se busca representar. \textit{Ej. Numero de padrón de alumno, código de materia son claves naturales debido a que tienen un significado contextual}. Las sustitutas, por lo tanto, no tienen un significado.
+
+Cualquier valor generado por sistema que no permita duplicados en distintas filas, califica para serlo. Los casos mas comunes son un numero secuencial, o un numero aleatorio
+
+Una clave sustituta se puede ver en el siguiente ejemplo con la columna 'Id', empieza en 1 y van aumentando de a 1, esta es una decisión arbitraria
+
+Alumnos(\underline{Id},Legajo,Nombre)
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\rowcolor[HTML]{FFFFC7} 
+\multicolumn{1}{|c|}{\cellcolor[HTML]{FFFFC7}Id} & \multicolumn{1}{c|}{\cellcolor[HTML]{FFFFC7}Legajo} & Nombre \\ \hline
+1                                                & 51253                                               & Juan   \\ \hline
+2                                                & 51254                                               & Lucas  \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Convenciones}
+\begin{itemize}
+\item Clave primaria sustituta $\rightarrow$ Id
+\end{itemize}
+\begin{itemize}
+\item Cada columna que haga referencia a otra columna de otra tabla $\rightarrow$ Id\_\textit{Nombre de la tabla referenciada en singular}
+\end{itemize}
+
+\subsubsection*{Recomendaciones}
+\begin{itemize}
+\item No perder restricciones sobre la clave natural
+\item Definir la clave natural \textit{El legajo} como clave candidata, para que no haya valores duplicados. Se puede hacer con un constraint de tipo UNIQUE
+\item Agregar restricción de que el legajo no sea nulo, con el constraint NOT NULL
+\item Puede ser conveniente definir índice con el legajo para facilitar búsquedas
+\end{itemize}
+
+\subsubsection*{¿Por que usarlas?}
+\begin{itemize}
+\item Es decisión de diseño de la base de datos.
+\end{itemize}
+
+\subsubsection*{Desventajas}
+
+\begin{itemize}
+\item Mayor uso de espacio debido a la nueva columna
+\item Afecta la performance de consultas, ya que entran menos registros en bloque de disco y porque algunas consultas deben empezar a usar mas \textit{joins}. \textit{Ej. Si un alumno quiere buscar sus notas, con el esquema de claves naturales, consulta la tabla de notas con su padrón, mientras que con las sustitutas hay que realizar un join con la tabla de alumnos ya que el vinculo es por id y no por padrón }
+\item En un esquema de claves sustitutas tenemos mas restricciones o constraints a validar, afectando la performance de actualizaciones
+\item Perdida de significado de claves foráneas
+\end{itemize}
+
+\subsubsection*{Ventajas}
+
+\begin{itemize}
+\item Inmutabilidad ante cambios en los datos. \textit{No importaría si cambia el formato del legajo, si cambia el legajo, hay que modificar todas las tablas}
+\item La performance de la base de datos (depende del caso particular), \textit{Si tenemos muchas claves foráneas que usen muchos atributos o ocupen mucho, usar claves sustitutivas de un tipo de dato pequeño - un int - puede implicar una mejora de espacio que compense el agregado de la columna}
+\end{itemize}
+
+\subsubsection*{¿Que tipo de claves sustitutas usar?}
+
+\subsubsection*{Secuenciales}
+
+\begin{itemize}
+\item Depende del sistema gestor de la base de datos, hay que revisar cual recomiendan. El incremento es automático
+\item La desventaja es con migraciones en bases de datos, puede ocurrir que algunos ids ya existan en el otro ambiente. Otro problema puede ocurrir con la seguridad, el tener acceso a los valores de una fila, puede otorgar información extra. También otro problema de seguridad, se da en poder crear fácilmente ids de registros fácilmente.
+\end{itemize}
+
+\subsubsection*{Claves aleatorias}
+
+\begin{itemize}
+\item Para solucionar los problemas se pueden usar claves aleatorias. Se utiliza un rango grande para evitar colisiones. Se utiliza UUIDs (128 bits, rango muy grande)
+\item La desventaja es el espacio ocupado
+\end{itemize}
+
+\noindent\rule{\textwidth}{0.5pt}
+
+
+\subsubsection*{Interrelaciones}
+
+\begin{itemize}
+\item Cardinalidad: Con cuantas instancias de cada tipo de entidad pueden relacionarse con una instancia concreta de tipos de entidades restantes. El \textbf{máximo} numero de instancias posibles. \textit{Un futbolista solo puede haber nacido en un único país. En un país pueden haber nacido muchos futbolistas}
+\end{itemize}
+
+\begin{itemize}
+\item Participación: \textbf{Mínima} cantidad de instancias de cada tipo de entidad que deben relacionarse con una instancia concreta de los tipos de entidades restantes. Relación muy fuerte. \textit{Un futbolista debe haber nacido en algún país. En un país puede no haber nacido ningún futbolista.}
+\end{itemize}
+
+Tener en cuenta que pueden existir tipos de interrelación recursivos o unarios.
+
+\smallskip
+
+Restricciones de cardinalidad + Restricciones de participación = Restricciones estructurales
+
+
+
+\subsubsection*{Atributos (en interrelaciones)}
+Es un atributo que sale de la relación. (del rombo que esta en el medio indicando el tipo) \textit{Fecha en Alumno aprobó Asignatura}
+
+\subsubsection*{Atributos clave (en interrelaciones)}
+Si tomo dos instancias distintas, el valor del atributo debe de ser distinto. Son la forma de identificar los arcos (aristas) entre cada relación de instancias. 
+\textit{Ejemplo: Con la asignatura y el numero de padrón ya puedo identificar a todos los alumnos si aprobaron la materia.}
+
+Sólo pueden formar parte de los atributos clave de una
+interrelación los atributos clave de los tipos de entidad que
+participan de la misma.
+
+
+\subsubsection*{Pasos para resolver problemas}
+\begin{enumerate}
+\item Identificar tipos de entidad
+\item Identificar atributos
+\item Identificar tipos de interrelación
+\item Identificar atributos clave
+\item Identificar restricciones estructurales
+\end{enumerate}
+
+\textit{Ejemplo: Los dueños de esta librería desean crear una base de
+datos que contenga información sobre los libros
+actualmente en venta, y que permita hacer búsquedas por
+nombre o país de origen del autor, género, idioma y año.}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/EjLibreria.PNG}
+\end{figure}
+
+\subsection*{Modelo Entidad-Interrelación mas avanzado}
+\subsubsection*{Entidades fuertes y débiles}
+Las fuertes son aquellas que puedo identificar por si mismas.
+Las débiles dependen de otro para subsistir. Su clave se compone de la clave de su entidad identificadora, mas algún/os atributos propios, que se denominan discriminan tes y se indican con lineas punteadas. Un tipo de entidad débil tiene participación total en el tipo de interrelación que la vincula con su tipo de entidad identificadora.
+
+Gráficamente a las entidades débiles se las indica con doble raya en el rectángulo, la flecha al rombo, y el rombo.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/entidadDebil.PNG}
+\end{figure}
+
+\subsubsection*{Interrelaciones ternarias}
+Son aquellas que participan 3 tipos de entidad distintos
+
+La cardinalidad de un tipo entidad determina la cantidad de instancias de interrelación en que puede aparecer, fijadas las instancias de los otros dos tipos de entidades. Para identificarlos necesito los atributos clave de los tres tipos de entidad.
+
+\subsubsection*{Agregación}
+La desventaja del modelo anterior es que\textit{ no nos permite registrar cantantes en rondas si no fueron calificados.} Se resuelve con una agregación. Se representa con una caja que agrupa a las entidades. Las entidades que se relacionen con esta, llevan la flecha hasta la caja. Se trata como que la \textit{agregación de un Cantante
+y una Ronda fueran una entidad en sí misma}.
+
+
+\subsubsection*{Generalización/especialización}
+Permiten evitar información redundante. Representan relaciones del tipo 'es un'. Gráficamente se muestran con un triangulo dado vuelta. Se heredan los atributos de la instancia padre. No hay herencia múltiple.
+
+\textit{Persona es un alumno/docente, persona tiene como atributos al DNI y al nombre, mientras que el alumno y docente tienen sus atributos específicos.}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/GeneralizacionYEspecializacion.PNG}
+\end{figure}
+
+2 propiedades de este tipo de relación:
+\begin{itemize}
+\item Superposición: Los subtipos de entidad pueden ser disjuntos o superpuestos. En caso de ser superpuestos, una instancia del tipo de entidad padre puede corresponderse con instancias de varios subtipos de entidad.
+\item Completitud: Los subtipos de entidad pueden cubrir a todo el tipo de entidad padre (total), o no (parcial). En caso de no cubrirlo, puede ocurrir que algunas instancias del tipo de entidad padre no se correspondan con ningún subtipo de entidad.
+\end{itemize}
+
+\subsubsection*{Unión}
+En la unión también tenemos a un padre y distintos subtipos de entidad. La diferencia es que el padre es subclase de los subtipos de entidad (que son la superclase).
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/UnionEjemplo.PNG}
+\end{figure}
+
+\textit{Un cliente ES UNA persona física o bien ES UNA persona jurídica. Pero NO
+necesariamente una persona física debe ser un cliente del banco.}
+
+\subsubsection*{Dependencia existencial}
+Se ve en el cardinal mínimo, necesito si o si de otra entidad para existir.
+
+% clave bd, parcialitos finalizan el sabado/martes a las 23:59, por campus
+% talleres, realizan en clase

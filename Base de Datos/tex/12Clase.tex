@@ -1,0 +1,116 @@
+\subsection*{Clausura de F}
+Es el conjunto formado por todas las dependencias funcionales de F. No tiene sentido calcularla, sirve mas para entender el concepto.
+
+Queremos trabajar con el conjunto que tenga menos. (llamado cubrimiento mínimal del conjunto de dependencias) Equivalente y con menos elementos.
+
+Todo lo que se puede generar con la clausura uniendo dos relaciones es lo que se preserva. De esta forma podemos ver si perdimos algo.
+
+Cuando vemos una dependencia funcional que no cumple los requisitos en una relación R, podemos separarla.
+
+\begin{itemize}
+\item $R(A)$
+\item $X\rightarrow Y$
+\item $R_1(A-(Y-X))$
+\item $R_2(X \cup Y)$
+\end{itemize}
+Se garantiza que la junta de las proyecciones R1 y R2 recupera la R original.
+
+Cuando una descomposición pierde información, no es que se pierden tuplas, lo que sucede es que se crean nuevas.
+
+
+\subsection*{Dependencia multivaluada}
+$X\twoheadrightarrow Y$ es una restricción sobre las posibles tuplas de R que implica que para todo par de tuplas t1, t2 tales que t1[x] = t2[x] deberían existir otras dos tuplas t2 y t4 que resulten de intercambiar los valores de Y entre t1 y t2.
+(Implican otras tuplas)
+
+Son triviales si la unión de X e Y da la misma tabla o Y esta incluido en X.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/DependenciasConjuntos.PNG}
+\end{figure}
+
+\subsection*{Cuarta Forma Normal}
+\textit{No entra en el parcial, entra en el final.}
+
+No tiene que haber dependencias multivaluadas no triviales $X\twoheadrightarrow Y$. Se esta en 4FN si para toda $X\twoheadrightarrow Y$, X es superclave.
+
+\begin{itemize}
+\item Hay que identificar la dependencia multivaluada. No es fácil con una tabla ya armada. Si se hace el paso desde el modelo conceptual de forma correcta no aparecen estos problemas.
+\item Si R esta en 4FN, entonces R esta en FNBC
+\item Es común que las dependencias multivaluadas provengan de la existencia de atributos multivaluados en el modelo conceptual, o de interrelaciones N-N no capturadas.
+\end{itemize}
+
+Descomponemos generando nuevas tablas.
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/4FN.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/4FN2.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/4FN3.PNG}
+\end{figure}
+
+\subsection*{Dependencias de junta}
+Es cuando tenemos relaciones que pueden ser descompuestas en más de dos relaciones sin perdida de información.
+
+
+\subsection*{Quinta Forma Normal}
+\textit{No entra en el parcial, entra en el final.}
+
+\begin{itemize}
+\item Una relación R(A) está en quinta forma normal (5FN) si y sólo si
+\item para toda dependencia de junta (X1, X2, ..., Xn) no trivial (i.e., tal
+\item que ningún Xi = A) todos los Xi son superclaves.
+\item Se descompone realizando una tabla por cada relación.
+\item Es muy difícil detectar dependencias de junta en forma general, y
+\item esta descomposición rara vez es aplicada
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/5FN.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/5FN2.PNG}
+\end{figure}
+
+
+\newpage
+\subsection*{Algoritmo de verificación de junta sin perdidas}
+\begin{itemize}
+\item Se llama algoritmo de Chase. Nos permite verificar la preservación de información de una descomposición aun sin saber como se obtuvo.
+\item El algoritmo chase utiliza una tabla denominada tableau, con
+\item tantas filas como relaciones y tantas columnas como atributos
+\item El algoritmo parte de una hipotética tupla (a1, a2, a3, a4) de la
+\item junta r1 $\bowtie$ r2 $\bowtie$ r3 que se proyecta a cada una de las ri: si una
+\item relación ri contiene un atributo Aj, entonces en la posición (i, j) de
+\item la tabla escribimos el valor abstracto aj. (las filas son las relaciones, las columnas los atributos) (las aj van en los lugares que comparten atributos las relaciones)
+\item Rellenamos las demás posiciones con valores bij.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.6\textwidth]{img/AlgoritmoChase.PNG}
+\end{figure}
+
+\begin{itemize}
+\item Después de rellenada, vamos remplazando los valores con las dependencias funcionales. (Priorizando elegir las a)
+\item Cuando llegamos al final y no nos quedo alguna fila con todas $a$, decimos que la descomposición no preserva la información.
+\item Cuando no  funciona el Chase nos da un contraejemplo mostrando donde la relación falla.
+\item Si llegamos al final y nos da una fila con todas a, preserva la información.
+\end{itemize}
+
+
+\newpage

@@ -1,0 +1,36 @@
+\section{Practica: Costos}
+
+\begin{itemize}
+\item Medimos en unidades de I/O a disco
+\item Cualquier otro proceso que se haga en comparación tiene un costo ínfimo.
+\item Cuando tenemos varias tablas en un join, empezamos por la que nos va a dejar menos resultados.
+\item Tabla mas pequeña es la que usamos en el ciclo externo (algoritmo para la junta)
+\item Es para disminuir el costo
+\item Analizar arboles que estén ramificados a izquierda o derecha (left-deep o right-deep) para acotar las posibilidades.
+\item \textbf{R-trees}: Indexan objetos geométricos a través de su minimum boungind rectangle (MBR) Pongo en las hojas del R-tree los MBR de las partes que contienen cada hoja.
+\item \textbf{Quad-trees}: El espacio se descompone en cuadrantes disjuntos. Cada cuadrante lo subdividimos si tiene un mínimo de puntos. Se usa para indexar puntos geométricos o datos rater en dos dimensiones.
+\end{itemize}
+
+\subsection*{Índices}
+
+\begin{itemize}
+\item Su objetivo es acceder de forma mas rápida a la búsqueda de datos. También es hacer cumplir las reglas de negocio (Ejemplo no hay padrones duplicados. La estructura sirve para hacerla cumplir)
+\item Cluster: El orden del índice con el orden de los datos coinciden. El orden en que vienen los datos del índice es como vienen los datos en el archivo
+\item No cluster: Es cuando no coinciden los ordenes, se cruza del índice a los datos con el camino que toma otra entrada del índice.
+\item La misma consulta se comporta de forma distinta dependiendo del tipo de índice.
+\item Simples: Están creados sobre un único atributo. I(A), I(B)
+\item Compuestos: Están creados por 2 o mas atributos. I(A,B) != I(B,A). El orden de los atributos dentro del índice es importante para la optimización de la consulta. Conviene poner en el primer lugar el atributo mas discriminante.
+\item Pueden tener duplicados o no, con duplicados seria que nos manda a un lugar donde hay varias entradas. (Ejemplo índice por comuna, una comuna nos manda a una entra con muchos alumnos.)
+\item Podemos indexar parcialmente las tablas. (De forma completa o densa significa que cada registro de la tabla tiene su representación en el índice)
+\item El índice sirve al momento de acceder a la estructura física, si proyectamos lo perdimos, ya no nos sirve.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\newpage

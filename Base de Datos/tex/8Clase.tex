@@ -1,0 +1,789 @@
+\section{Practica: Taller SQL}
+\begin{itemize}
+    \item Es un lenguaje declarativo, le digo que quiero y de alguna forma lo hace.
+    \item ¿Cual forma de hacer algo es mas performante? No es fácil saberlo, generalmente el motor se puede dar cuenta cual hacer.
+    \item Las cadenas de caracteres con comillas simples. Las comillas dobles las interpreta como que queremos acceder a una columna.
+    \item Operadores lógicos AND, OR, NOT
+    \item Evitar usar SELECT * ... , ya que no queda definida la consulta en ese momento.
+    \item Definir forma de almacenar datos, esto es buena practica, pero trae problemas ante alguna equivocación.
+    \item Con los operadores de conjuntos por defecto no hay duplicados.
+    \item No usar NATURAL JOIN en aplicativos para evitar problemas a futuro, ya que la consulta no queda totalmente definida. Si el esquema de la tabla cambia, nos enteramos cuando se ejecuta.
+    \item El resultado de una consulta se puede usar como tabla en la entrada de otra consulta (subconsulta)
+    \item Cuando agrupo puedo devolver alguna de las columnas agrupadas, o resultados que surgen de alguna función de agregación.
+\end{itemize}
+
+\subsection*{1 - Devuelva todos los datos de las notas que no sean de la materia 75.1}
+
+\begin{itemize}
+\item Con que difiera alguno de ellos ya nos alcanza. Fijarse con De Morgan. Plantearlo con \mint{sql}|AND| es un error común, ya que obligamos a que sea distinto si o si, en este caso hay que negar el resultado si queremos el \mint{sql}|AND|.
+\end{itemize}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT * FROM notas WHERE codigo <> 75 OR numero <> 1
+\end{minted}
+
+\subsection*{2 Devuelva para cada materia dos columnas: una llamada “código” que contenga una concatenación del código de departamento, un punto y el numero de materia, con el formato “XX.YY” (ambos valores con dos dígitos, agregando ceros a la izquierda en caso de ser necesario) y otra con el nombre de la materia.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT to_char(codigo,'fm00') || '.' || to_char(numero,'fm00') AS "codigo",nombre
+FROM materias
+\end{minted}
+
+\begin{itemize}
+\item Con el doble pipe lo estamos concatenando con un punto en el medio.
+\item Con el AS renombramos la columna inicial.
+\item Documentación del \href{https://www.postgresql.org/docs/current/functions-formatting.html}{to\_char}.
+\end{itemize}
+
+
+
+\subsection*{3 - Para cada nota registrada, devuelva el padrón, código de departamento, número de materia, fecha y nota expresada como un valor entre 1 y 100.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,codigo,numero,fecha,nota*10 AS "nota"
+FROM notas
+\end{minted}
+
+\subsection*{4 -  Ídem al anterior pero mostrando los resultados paginados en páginas de 5 resultados cada una, devolviendo la segunda página}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,codigo,numero,fecha,nota*10 AS "nota"
+FROM notas
+OFFSET 5 ROWS FETCH FIRST 5 ROWS ONLY
+\end{minted}
+
+
+\begin{itemize}
+\item Esta \mint{sql}|LIMIT 5| después del offset también.
+\item Si no le digo algún orden, no se que me va a devolver. Si queremos garantizarnos los resultados, hay que tomarse la costumbre de ordenar de la forma que no deje ambigüedad en las filas. En este caso agregando antes del \mint{sql}|FETCH| un \mint{sql}|ORDER BY padron| - Así evitamos tener un orden indeterminado.
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,codigo,numero,fecha,nota*10 AS "nota"
+FROM notas
+ORDER BY padron,codigo,numero,fecha
+OFFSET 5 ROWS FETCH FIRST 5 ROWS ONLY;
+\end{minted}
+
+\subsection*{5 - Ejecute una consulta SQL que devuelva el padrón y nombre de los alumnos cuyo apellido es “Molina”}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,nombre
+FROM alumnos
+WHERE apellido = 'Molina';
+\end{minted}
+
+\begin{itemize}
+\item No es lo mismo que: (el siguiente estaría mal)
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,nombre
+FROM alumnos
+WHERE apellido = 'molina';
+\end{minted}
+
+
+\begin{itemize}
+\item Postgres es una base de datos CASE SENSITIVE. Por lo que no devolvería nada en este caso. \mint{sql}|LIKE| es case sensitive también, se puede usar \mint{sql}|ILIKE| (no es estándar y no aprovecha índices)
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,nombre
+FROM alumnos
+WHERE apellido ILIKE 'Molina';
+\end{minted}
+
+
+\begin{itemize}
+\item Otra alternativa es llevándolo a una forma común con Upper o Lower.
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron,nombre
+FROM alumnos
+WHERE Upper(apellido) = 'MOLINA';
+\end{minted}
+
+
+\subsection*{6 - Obtener el padrón de los alumnos que ingresaron a la facultad en el año 2010}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron
+FROM alumnos
+WHERE fecha_ingreso>='2010-01-01' AND fecha_ingreso<='2010-12-31';
+\end{minted}
+
+Con otra sintaxis:
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron
+FROM alumnos
+WHERE fecha_ingreso BETWEEN '2010-01-01' AND '2010-12-31';
+\end{minted}
+
+\subsection*{7 - Obtener la mejor nota registrada en la materia 75.15}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT MAX(nota)
+FROM notas
+WHERE codigo=75 AND numero=15;
+\end{minted}
+
+\subsection*{8 - Obtener el promedio de notas de las materias del departamento de código 75}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT AVG(nota)
+FROM notas
+WHERE codigo=75;
+\end{minted}
+
+
+\subsection*{9 - Obtener el promedio de nota de aprobación de las materias del departamento de código 75.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT AVG(nota)
+FROM notas
+WHERE codigo=75 and nota>=4;
+\end{minted}
+
+\subsection*{10 - Obtener la cantidad de alumnos que tienen al menos una nota}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT COUNT(DISTINCT padron)
+FROM notas
+\end{minted}
+
+
+\begin{itemize}
+\item \mint{sql}|COUNT| solo cuenta los distintos de nulos, si queremos que sean distintas lo hacemos con \mint{sql}|DISTINCT|.
+\end{itemize}
+
+
+\subsection*{11 - Devolver los padrones de los alumnos que no registran nota en materias}
+
+
+\begin{itemize}
+\item Estamos realizando la operación de conjuntos: A - B
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+(SELECT padron
+FROM alumnos)
+EXCEPT
+(SELECT padron
+FROM notas)
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT padron
+FROM alumnos
+WHERE padron
+NOT IN
+(SELECT DISTINC(padron) FROM notas)
+\end{minted}
+
+\subsection*{12 - Con el objetivo de traducir a otro idioma los nombres de materias y departamentos, devolver en una única consulta los nombres de todas las materias y de todos los departamentos}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+(SELECT nombre
+FROM materias)
+UNION
+(SELECT nombre
+FROM departamentos)
+\end{minted}
+
+\subsection*{13 - Devolver para cada materia su nombre y el nombre del departamento}
+
+
+\begin{itemize}
+\item Con \mint{sql}|JOIN|
+\end{itemize}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT m.nombre, d.nombre
+FROM materias AS m, departamentos AS d
+WHERE m.codigo=d.codigo 
+\end{minted}
+
+
+\begin{itemize}
+\item Otras forma para hacerlo:
+\end{itemize}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT m.nombre, d.nombre
+FROM materias AS m INNER JOIN  departamentos AS d
+ON m.codigo=d.codigo 
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT m.nombre, d.nombre
+FROM materias AS m INNER JOIN departamentos AS d
+USING (codigo) 
+\end{minted}
+
+
+\subsection*{14 - Para cada 10 registrado, devuelva el padrón y nombre del alumno y el nombre de la materia correspondientes a dicha nota}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT a.padron,a.nombre,m.nombre
+FROM alumnos AS a, notas AS n, materias AS m
+WHERE n.nota=10 AND a.padron=n.padron
+AND n.codigo=m.codigo AND n.numero=m.numero;
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT a.padron,a.nombre,m.nombre
+FROM notas AS n
+INNER JOIN materias AS m ON m.numero=n.numero AND m.codigo=m.codigo
+INNER JOIN alumnos AS a ON a.padron=n.padron
+WHERE n.nota=10;
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT n.padron,a.nombre AS nombre_alumno,m.nombre AS nombre_materia
+FROM (notas n INNER JOIN alumnos a USING (padron)) INNER JOIN materias m 
+USING (codigo,numero)
+WHERE n.nota = 10
+\end{minted}
+
+\subsection*{15 - Listar para cada carrera su nombre y el padrón de los alumnos que estén anotados en ella. Incluir también las carreras sin alumnos inscriptos}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT c.nombre,i.padron
+FROM carreras AS c LEFT OUTER JOIN inscripto_en AS i
+USING (codigo)
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT carreras.nombre,alumnos.nombre,alumnos.apellido
+FROM carreras
+LEFT OUTER JOIN inscripto_en ON inscripto_en.codigo = carreras.codigo
+LEFT OUTER JOIN alumnos ON inscripto_en.padron = alumnos.padron
+\end{minted}
+
+\subsection*{16 - Ídem punto anterior pero teniendo en cuenta únicamente alumnos con padrón mayor a 75000}
+
+% REVISAR
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT carreras.nombre,alumnos.nombre,alumnos.apellido
+FROM carreras
+LEFT OUTER JOIN inscripto_en ON inscripto_en.codigo = carreras.codigo
+LEFT OUTER JOIN alumnos ON inscripto_en.padron = alumnos.padron
+WHERE alumnos.padron > 75000
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT c.nombre,i.padron
+FROM carreras AS c LEFT OUTER JOIN inscripto_en AS i
+USING (codigo)
+WHERE padron > 75000
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT c.nombre, ie.padron
+FROM taller_4.CARRERAS c 
+LEFT OUTER JOIN taller_4.inscripto_en ie ON (ie.codigo = c.codigo AND ie.padron > 75000);
+\end{minted}
+
+\subsection*{17 - Listar el padrón de aquellos alumnos que tengan m´as de una nota en la materia 75.15}
+
+
+\begin{itemize}
+\item De esta forma no se tiene la mejor performance, ya que se esta revisando fila por fila con el valor de la consulta mayor.
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT a.padron
+FROM alumnos as a
+WHERE 
+(SELECT count(n.nota)>1 FROM notas AS n
+WHERE n.padron=a.padron AND n.codigo=75 AND n.numero=15)
+\end{minted}
+
+\begin{itemize}
+\item Otra opción poniendo el >1 afuera de la subconsulta.
+\end{itemize}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT a.padron
+FROM alumnos as a
+WHERE 
+(SELECT count(n.nota) FROM notas AS n
+WHERE n.padron=a.padron AND n.codigo=75 AND n.numero=15) >1 
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT DISTINCT n1.padron
+FROM notas n1, notas n2
+WHERE n1.codigo = 75 AND n2.codigo = 75
+AND n1.numero = 15 AND n2.numero = 15
+AND n1.padron = n2.padron
+AND n1.fecha <> n2.fecha
+\end{minted}
+
+\subsection*{18 - Obtenga el padrón y nombre de los alumnos que aprobaron la materia 71.14 y no aprobaron la materia 75.15}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT A.PADRON, A.NOMBRE 
+FROM ALUMNOS A
+WHERE EXISTS(SELECT 1 FROM NOTAS N WHERE N.NOTA >= 4
+            AND N.CODIGO = 71 AND N.NUMERO = 14 
+            AND N.PADRON = A.PADRON) 
+AND NOT EXISTS(SELECT 1 FROM NOTAS N WHERE N.NOTA >= 4 
+            AND N.CODIGO = 71 AND N.NUMERO = 15 
+            AND N.PADRON = A.PADRON);
+\end{minted}
+\begin{itemize}
+\item Se fija que exista un aprobado en la materia, y que no exista un aprobado en la otra.
+\end{itemize}
+
+
+Otra forma:
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT A.PADRON, A.NOMBRE 
+FROM ALUMNOS A
+WHERE A.PADRON IN (SELECT N.PADRON FROM NOTAS N WHERE N.NOTA >= 4 
+			 AND N.CODIGO = 71 AND N.NUMERO = 14 ) 
+AND A.PADRON NOT IN (SELECT N.PADRON FROM NOTAS N 
+				WHERE N.NOTA >= 4 
+				AND N.CODIGO = 71 AND N.NUMERO = 15 );
+\end{minted}
+
+\subsection*{19 - Obtener, sin repeticiones, todos los pares de padrones de alumnos tales que ambos alumnos rindieron la misma materia el mismo día. Devuelva también la fecha y el código y numero de la materia}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT DISTINCT N.PADRON PADRON, NOTA.PADRON PADRON2,
+N.FECHA, N.CODIGO, N.NUMERO FROM TALLER_4.NOTAS N
+INNER JOIN
+TALLER_4.NOTAS AS NOTA
+ON NOTA.PADRON < N.PADRON
+AND NOTA.FECHA = N.FECHA 
+AND N.CODIGO = NOTA.CODIGO 
+AND N.NUMERO = NOTA.NUMERO;
+\end{minted}
+
+
+\subsection*{20 - Para cada departamento, devuelva su código, nombre, la cantidad de materias que tiene y la cantidad total de notas registradas en materias del departamento. Ordene por la cantidad de materias descendente}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT d.codigo, d.nombre, COUNT(DISTINCT n.numero) AS "cant_mat",
+COUNT(*) AS "cant_not"
+FROM notas n INNER JOIN materias m USING (codigo, numero) 
+INNER JOIN departamentos d USING (codigo)
+GROUP BY d.codigo, d.nombre
+ORDER BY COUNT(DISTINCT n.numero) DESC
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+WITH cant AS (
+	SELECT codigo, COUNT(numero) AS cant FROM materias GROUP BY codigo
+), notasD AS (
+	SELECT codigo, COUNT(notas) AS cant FROM notas GROUP BY codigo
+)
+SELECT d.codigo,d.nombre, c.cant, n.cant
+FROM departamentos d, cant c, notasD n
+WHERE d.codigo = c.codigo AND d.codigo=n.codigo
+ORDER BY c.cant DESC
+
+\end{minted}
+
+\subsection*{21 - Para cada carrera devuelva su nombre y la cantidad de alumnos inscriptos. Incluya las carreras sin alumnos}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT c.nombre, COUNT(i.padron)
+FROM carreras c LEFT OUTER JOIN  inscripto_en i USING (codigo)
+GROUP BY c.codigo, c.nombre
+\end{minted}
+
+Es importante contar un atributo que no tenga nulos, así lo cuentan.
+
+\subsection*{22 - Para cada alumno con al menos tres notas, devuelva su padrón, nombre, promedio de notas y mejor nota registrada}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT a.padron, a.nombre, AVG(n.nota) AS promedio, MAX(n.nota) AS mejor_nota
+FROM alumnos AS a, notas AS n
+WHERE a.padron = n.padron
+GROUP BY a.padron, a.nombre
+HAVING COUNT(*) >= 3
+\end{minted}
+
+\begin{itemize}
+\item Condiciones que se aplican grupo a grupo no van en el WHERE, ya que viene en una etapa después.
+\item Puedo evaluar cosas que después no devuelvo en el HAVING.
+\end{itemize}
+
+
+\subsection*{23 - Obtener el código y numero de la o las materias con mayor cantidad de notas registradas.}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT n.codigo, n.numero, COUNT(*)
+FROM notas n
+GROUP BY n.codigo, n.numero
+HAVING COUNT(*) >= ALL (
+    SELECT COUNT(*)
+    FROM notas n
+    GROUP BY n.codigo, n.numero
+)
+\end{minted}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+WITH cantidades AS (SELECT n.codigo, n.numero, COUNT(*) AS cant
+	FROM notas n
+	GROUP BY n.codigo, n.numero)
+SELECT codigo, numero, cant
+FROM cantidades c
+WHERE c.cant = (SELECT MAX(cant) FROM cantidades)
+\end{minted}
+
+
+\begin{itemize}
+\item No es valido ordenarlo y devolver el primero, puede darse el caso de que varios coincidan con el mejor valor. Queremos todas con la mayor cantidad.
+\item No esta permitido realizar un MAX del COUNT en el HAVING.
+\item No podemos anidar funciones de agregación.
+\end{itemize}
+
+\subsection*{24 - Obtener el padrón de los alumnos que tienen nota en todas las materias}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+SELECT padron
+FROM alumnos a
+WHERE NOT EXISTS (
+    SELECT * 
+    FROM materias m 
+    WHERE NOT EXISTS (
+        SELECT * 
+        FROM notas n
+        WHERE n.padron = a.padron
+		      AND n.codigo = m.codigo
+		      AND n.numero = m.numero
+        )
+)
+
+\end{minted}
+
+\begin{itemize}
+\item Es una división.
+\item Buscamos los alumnos con nota en todas las materias, tal que para los alumnos no exista materia en la que no tiene nota.
+\item Alumnos para los que no existe una materia en la que no existe una nota de ese alumno en esa materia
+\end{itemize}
+
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+SELECT padron
+FROM alumnos a
+WHERE NOT EXISTS (
+    (SELECT codigo, numero FROM materias)
+    EXCEPT
+    (SELECT codigo, numero FROM notas n WHERE n.padron=a.padron)
+)
+
+\end{minted}
+
+
+\begin{itemize}
+\item Primer conjunto: todas las materias
+\item Segundo conjunto: todas las materias en las que un alumno tiene nota
+\end{itemize}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+
+SELECT padron
+FROM notas n
+GROUP BY n.padron
+HAVING COUNT( DISTINCT(to_char(codigo,'fm00') ||'.'|| to_char(numero,'fm00') ))
+       =
+       (SELECT COUNT(*) FROM materias)
+
+\end{minted}
+
+
+\begin{itemize}
+\item Contar cuantas materias hay y cuento en cuantas materias tiene nota. Tiene que dar lo mismo
+\item El DISTINCT solo recibe un atributo, no es estandar que tome dos.
+\end{itemize}
+
+\subsection*{25 - Obtener el promedio general de notas por alumno (cuantas notas tiene en promedio un alumno), considerando únicamente alumnos con al menos una nota}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+
+SELECT CAST(COUNT(*) AS DECIMAL) / COUNT(DISTINCT padron)
+FROM notas n;
+
+\end{minted}
+
+Cuidado con realizar la división entera, esta trunca el resultado.
+\newpage

@@ -1,0 +1,114 @@
+\section{Practica: Normalización}
+\begin{itemize}
+\item Tomar un esquema y lo partimos en partes más pequeñas para llegar a esquemas más depurados.
+\item La creación de tuplas nuevas al unir tablas con datos apócrifos hace que se pierda toda la información.
+\item En esquemas defectuosos hay ambigüedades, se pierde información, existen valores nulos.
+\item El esquema conceptual nos da una herramienta valiosa para modelar. Cuando hacemos el mapeo al modelo lógico buscamos obtener un buen esquema.
+\item "Hechos distintos se deben almacenar en objetos distintos."
+\item Una dependencia funcional es una restricción sobre el conjunto de tuplas que pueden aparecer en una relación. 
+\item Tenemos que preguntar sobre los datos. ¿Que significa este código? ¿Este sector? ¿Que depende de que?
+\end{itemize}
+
+
+
+\subsection*{¿Como se descubren las dependencias funcionales?}
+\begin{itemize}
+\item No podemos inferirlas a partir de una tabla. Necesitamos de un relato que nos brindara el conocedor del dominio del problema. Esto es fundamental para diseñar correctamente la base de datos que responda al problema planteado. (Tomamos cada frase y la analizamos)
+\item Cuando dos elementos se están asociando entre si, digo que son equivalentes. $ X \rightarrow Y ; Y \rightarrow X $
+\item La clave y superclave son casos particulares de dependencias funcionales. Decimos que X es una clave si X implica todos los atributos (R - la relación) y no existe ningún Z tal que este contenido en X e implique R (debe de ser minimal).
+\end{itemize}
+
+
+\subsection*{¿Como operamos con ellas?}
+
+Usamos los Axiomas de Armstrong (RAT). Con esto se pueden descubrir dependencias que por ahí están ocultas en otras.
+
+\medskip
+Usar las definiciones y se va a llegar al resultado.
+
+\begin{itemize}
+\item \textbf{Reflexividad} Si Y esta incluido en X, podemos inferir que X implica Y. Si $Y \subseteq X$ inferir $X\rightarrow Y$
+\item \textbf{Aumento}: Para cualquier conjunto W, de X a Y puedo inferir XW implica YW. $X\rightarrow Y$ inferimos $XW\rightarrow YW$
+\item \textbf{Transitividad}: De X implica Y e Y implica Z podemos inferir que X implica Z. $X\rightarrow Y$ e $Y\rightarrow Z$ inferimos $X\rightarrow Z$
+\end{itemize}
+
+\subsection*{Clausura de F ($F^+$)}
+Dado un conjunto de dependencias funcionales de F, la clausura $F+$ es el conjunto de todas las dependencias funcionales que pueden inferirse con los axiomas de Armstrong.
+
+\begin{center}
+    $F+ = \{X\rightarrow Y / F|=X\rightarrow Y\}$
+\end{center}
+
+\begin{itemize}
+\item $F|=X\rightarrow Y$ significa que esa dependencia funcional esta implicada por F
+\end{itemize}
+
+\subsection*{Clausura de un conjunto de atributos $X_F^+$}
+
+Es el conjunto de todos los atributos contenidos en la relacion tal que X implica esos atributos derivado con los axiomas de Armstrong (Con X un atributo).
+
+\begin{center}
+    $X_F^+ = \{ A, A\subseteq R \ y \ F|=X\rightarrow A\}$
+\end{center}
+
+\subsection*{Equivalencias de conjuntos}
+Dos conjuntos de dependencias son equivalentes si sus clausuras son iguales.
+$F^+= G^+$
+
+\medskip
+Esto nos permite tener herramientas para transformar conjuntos en otros con propiedades mas deseables.
+
+
+\subsection*{Conjunto minimal $F_M$}
+\begin{itemize}
+\item Todo implicado de una dependencia funcional (parte derecha) tiene un único atributo (es simple)
+\item Todo determinante (parte izquierda) de una dependencia funcional es reducido (no contiene atributos redundantes)
+\item $F_M$ no contiene dependencias redundantes.
+\end{itemize}
+
+
+\subsubsection*{Algoritmo}
+\begin{enumerate}
+\item Dejamos todos los lados derechos con un único atributo (\textit{Ej. $A\rightarrow BD$ se transforma en $A\rightarrow B$, $A\rightarrow D$})
+\item Eliminamos todos los atributos redundantes del lado izquierdo (\textit{Ej. Analizo $AC\rightarrow E$, por $A\rightarrow B$ y $B\rightarrow C$ infiero $A\rightarrow C$ entonces $A\rightarrow E$ - O lo que es lo mismo veo si $E \subset A^+ =\{ A,B,C,D,E\}$ (sin la dependencia que estoy analizando), si pertenece a la clausura, no necesito al C (puede ser a la inversa tambien)})
+\item Eliminamos las dependencias funcionales redundantes. Vemos si están en la clausura del conjunto de atributos y restamos esta del conjunto si la incluye. $X\rightarrow Y si Y\subset X^+_{FD2-\{X\rightarrow Y\}}$ Si no incluye al atributo NO es redundante. Si alguna es redundante, se continua el análisis sin esa dependencia, se resta del conjunto FD2 junto a la dependencia que estamos analizando. \textit{Ej. $FD2-\{DepRedundante\}-\{X\rightarrow Y\}$} (Si X son atributos compuestos los veo juntos)
+\end{enumerate}
+
+
+Dependiendo del orden de como procese las cosas pueden quedar más de un conjunto minimal. Son equivalentes igual.
+
+\subsection*{Algoritmo de calculo de claves}
+\begin{enumerate}
+\item Calcular el cubrimiento minimal de dependencias funcionales del conjunto de atributos para calculo = Ca = R (el conjunto minimal de F)
+\item Detectar atributos independientes del calculo Ai (no están en ninguna dependencia funcional), eliminar del conjunto Ca=Ca-Ai y reservar para después
+\item Eliminar atributos equivalentes (dejar solo uno) Ae = atributos equivalentes menos uno. Ca=Ca - Ae (reservarlos para otro paso). Se remplazan en la dependencia funcional por el los atributos equivalentes que se conservan en Ca
+\item Se forma K con todos los elementos que sean solo implicantes Ai (solo en parte izquierda), se calcula $K^+$ si es todo R => K es clave
+\item Si K no resulto clave, se busca el conjunto de elementos que estén entre los implicantes pero que puedan ser implicados Aid (están en parte derecha e izquierda). Se agregan alternativamente a K todos los posibles subconjuntos de Aid (todos los de 1 elementos, 2 elementos, etc). Se verifica que K sea clave (calculando la clausura), en este paso se deben obviar los subconjuntos que contienen una clave ya calculada, ya que no van a ser minimales.
+\item Se agregan a la clave los elementos independientes
+\item Se calculan las otras claves con los elementos equivalentes
+\end{enumerate}
+
+\medskip
+Los elementos a la derecha nunca forman parte de la clave.
+
+\subsection*{Transformación por proyecciones}
+Son equivalentes los esquemas si se conserva la información y se conservan las dependencias funcionales.
+
+\subsection*{Tipos de atributos}
+\begin{itemize}
+\item Atributos primos son los que pertenecen a alguna clave candidata.
+\item Los no primos no pertenecen a ninguna.
+\end{itemize}
+
+
+\subsection*{Formas normales}
+\begin{itemize}
+\item 2FN ningún atributo no primo depende parcialmente de alguna clave.
+\item 3FN En toda dependencia no trivial $X \rightarrow A$ perteneciente a F, al lado izquierdo es siempre una superclave o A son atributos primos.
+\item FNBC En toda dependencia no trivial $X \rightarrow A$ perteneciente a F, al lado izquierdo es siempre superclave.
+\end{itemize}
+
+
+Superclave es que contiene alguna clave candidata y algún elemento de mas.
+
+Una dependencia la puedo perder, información nunca.

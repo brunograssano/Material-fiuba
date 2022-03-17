@@ -1,0 +1,137 @@
+\section{Modelo relacional}
+\begin{itemize}
+\item Es un modelo a nivel lógico.
+\item Va a intentar captar que es un conjunto, que es una relación formada por las tuplas.
+\item Ahora la abstracción es un concepto matemático llamado relación. (de discreta)
+\end{itemize}
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\begin{itemize}
+\item Dominio: Conjunto de valores homogéneos.
+\item Producto cartesiano:  A x B, se define como el conjunto de pares (a,b) que cumplen que 'a' $\in$ A y 'b' $\in$ B
+\end{itemize}
+
+\noindent\rule{\textwidth}{0.5pt}
+
+La cantidad de elementos que tiene es la cardinalidad de A por la de B. Llevándolo a código, al seleccionar Ciudades y Países en una consulta de SQL, se esta haciendo un producto cartesiano en el fondo, ya que se tienen todas las posibles combinaciones. Después se filtraran de acuerdo a la condición.
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+SELECT
+FROM Ciudades, Paises
+WHERE
+\end{minted}
+
+Una relación es un subconjunto de un producto cartesiano. Aquellos elementos del producto cartesiano tales que la ciudad pertenece al país.
+
+En el modelo relacional, un \textbf{nombre de relación} R junto con una \textbf{lista de atributos }asociados se denomina\textbf{ esquema de relación }y se denota:
+
+\begin{center}
+ $R( A \_{1},A\_{2},..A\_{n})$
+    
+    \medskip
+    
+    Películas(nombre,año,director, oscars)
+\end{center}
+
+\medskip
+
+\begin{itemize}
+\item Con cada atributo tengo un dominio en particular asociado. \textit{Ej. nombre película en string, año en los naturales positivos} Películas esta en el subconjunto del producto cartesiano de todos los atributos.
+\item Las\textbf{ instancias de la relación} son los elementos tengo cargados
+\item Un elemento se llama una \textbf{tupla} si la tupla pertenece al subconjunto, es una instancia $t$ $\in$ Películas
+
+\item El valor tomado por un atributo A en la tupla t se denota como t[A] o t.A
+\textit{Por ejemplo}: t[director] = Quentin Tarantino (referencia al valor en la tupla $t$)
+
+\item La cardinalidad en una relación R, es la cantidad de tuplas que posee.
+\item Las relaciones las vemos como tabla, donde las columnas representan atributos y las filas representan tuplas. También se puede decir archivos, registros para filas, y campos para las columnas.
+\end{itemize}
+
+
+\subsection*{Restricciones}
+
+\subsubsection*{De dominio}
+\begin{itemize}
+\item Las restricciones de dominio especifican que dado un atributo A de una relación R, el valor del atributo en una tupla $t$ debe pertenecer al dominio dom(A). Dominios posibles son naturales, reales, caracteres, string, bool, fechas, etc
+\item Se puede permitir que los atributos tengan el valor nulo (NULL)
+\item Deben ser atómicos (los atributos), no hay atributos compuestos (tarjeta de crédito) o multivaluados (conjunto de valores).
+\item No pueden existir dos tuplas distintas que coincidan en los valores de todos sus atributos. Una tupla no puede estar dos veces.
+\end{itemize}
+
+
+\subsubsection*{Superclave}
+
+\begin{itemize}
+\item Generalmente existe un subconjunto SK del conjunto de atributos de R que cumple la condición de que dadas dos tuplas s, t $\in$ R, las mismas difieren en al menos uno de los atributos de SK. Si un subconjunto SK cumple esto, lo llamamos \textbf{superclave} de R.
+\item Nos interesan las superclaves que son minimales (no admiten ningún subconjunto propio con la misma propiedad - no podemos achicar mas). Las llamamos \textbf{claves candidatas o claves}. Se elige una como \textbf{clave primaria}
+\item Las claves primarias las subrayamos
+\end{itemize}
+
+\textit{Por ejemplo:}
+
+\begin{center}
+PRIMARY KEY (nombre\_pelicula, nombre\_director)
+\end{center}
+
+\medskip
+
+No es minimal ya que podríamos tener\textit{ por ejemplo Quentin Tarantino, Tarantino}.
+
+
+\subsubsection*{De integridad}
+Un esquema de base de datos relacional S es un conjunto de esquemas de relación S junto con una serie de restricciones de integridad.
+
+\begin{itemize}
+\item \textbf{Restricciones de integridad de entidad:} la clave primaria de una relación no puede tomar el valor nulo. Quiere decir que tienen que ser identificables.
+\item \textbf{Restricción de integridad referencial:} aquello a lo que referencia tiene que existir en la otra tupla de S referenciada. \textit{Cuando un conjunto de atributos FK de una relación R hace referencia a la clave primaria de otra relación S, entonces para toda tupla de R debe existir una tupla de S cuya clave primaria sea igual al valor de FK, a menos que todos los atributos de FK sean nulos.}
+\end{itemize}
+
+\medskip
+
+\textit{Por ejemplo: Puedo tener una película sin actuación, pero no puedo tener una actuación sin película.}
+
+\begin{itemize}
+\item La clave foránea puede ser null.
+\item Para agregar claves foraneas al crear una tabla: \textit{clave tipo REFERENCES tabla(atributo)}
+\item Al intentar borrar de la tabla original, no te permite ya que esta referenciada desde la otra tabla.
+\item Las claves foráneas las indicamos también con un subrayado punteado (de la cátedra)
+\end{itemize}
+
+
+\subsection*{Operaciones}
+
+Las operaciones del modelo relacional se especifican a través de lenguajes como el álgebra relacional o el cálculo relacional. (Sección \ref{sec:relacional})
+Podemos realizar consultas o actualizaciones (inserción, eliminación, modificación
+
+\smallskip
+
+\begin{itemize}
+\item Las de consulta no violan ninguna restricción ya que no modifican ninguna relación.
+\item Las de inserción de tuplas pueden violar restricciones de dominio, unicidad, de integridad de entidad o referencial.
+\item Las de eliminación pueden violar la integridad referencial. Se puede rechazar la eliminación, eliminar en cascada, o poner NULL.
+\item En las de modificación:
+    \begin{itemize}
+        \item Si se modifica una clave foránea, se debe verificar que sus nuevos valores referencien a una tupla existente de la relación referenciada, o bien sean todos nulos. De lo contrario se debería rechazar la operación.
+        \item Si se modifica una clave primaria, puede violarse cualquiera de las restricciones de integridad, y se combinan las situaciones indicadas para inserción y eliminación.
+    \end{itemize}
+\end{itemize}
+
+Estas restricciones llevan a lo que se conoce como \textbf{transacciones}. Son un conjunto de operaciones que quiero que el gestor me asegure que o bien se ejecuten, o no se hace nada. Si una transacción no puede terminar de realizarse porque una de sus operaciones viola alguna restricción de integridad, entonces debe dejarse la base de datos en el estado anterior al inicio de la misma.
+
+
+
+\subsection*{Ejemplos}
+\begin{itemize}
+\item Los atributos multivaluados los tengo que poner en una tabla distinta. (Puedo tener varios teléfonos, los pongo en una tabla distinta)
+\item En un atributo compuesto tengo que poner todos los atributos
+\item ejemplo gerente-departamento, clave candidata, no puede haber dos filas con el nombre del gerente, se le agrega la palabra UNIQUE
+\item ejemplo docentes relación ternaria
+\end{itemize}
+

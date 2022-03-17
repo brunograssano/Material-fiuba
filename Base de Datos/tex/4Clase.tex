@@ -1,0 +1,210 @@
+\section{Practica: Modelo relacional}
+\textit{Vamos a ver como mapear de un modelo de conceptual de Chen al relacional.
+Obtener criterios para decidir cual es conveniente entre dos o mas modelos posibles.}
+
+\begin{itemize}
+\item Las entidades fuertes del conceptual pasan a ser entidades del relacional. 
+\item La primary key pasa al relacional subrayada también,
+\item Las relaciones binarias pasan también, tiene ambas ids como clave. Se subrayan cortado como foreign key (además del normal)
+\item Si una interrelación tiene un atributo, va adentro de la relación.
+\item La relación es un concepto matemático, la interrelación no (es mas conceptual).
+\end{itemize}
+
+
+\textbf{Entidades} A(\underline{idA},...) B(\underline{idB},...)
+
+\medskip
+
+\textbf{Relación} R(\underline{\underline{i}d\underline{A}},\underline{\underline{i}d\underline{B}})
+
+\medskip
+
+\begin{itemize}
+\item En las relaciones unarios, para el id de la otra entidad (mismo tipo) se le pone otro nombre cambiado arbitrariamente.
+\item En el caso binario 1:N (donde el valor mínimo de una es 0), como primary key de la relación usamos el id de la relación que tiene (1,1). Si ponemos a los dos, no seria mínima (seria una super clave). Hay que analizar también si conviene mover el atributo de la relación en la que tiene (1,1).
+\end{itemize}
+
+\medskip
+
+\textbf{Entidades}
+A(\underline{idA},...)
+B(\underline{idB},...)
+
+\medskip
+
+\textbf{Relación}
+R(\underline{i}d\underline{A},\underline{\underline{i}d\underline{B}})
+
+\medskip
+
+\textbf{Pasa a estar como}
+B(\underline{idB},...,\underline{i}d\underline{A})
+
+
+\begin{itemize}
+\item Esto es para minimizar la cantidad de tablas.
+\item Si tenemos el caso binario 1:N con opción de ninguno, la relación es necesaria, no se puede mover a una entidad. No esta bien ingresar algún carácter que indique que significa ninguno.
+\end{itemize}
+
+\medskip
+
+\textbf{En el caso 1:1 hay varias opciones.}
+
+\begin{itemize}
+\item No olvidarse de definir las claves candidatas dependiendo el caso.
+\item En las entidades débiles se tiene como PK el atributo discriminante y la clave de la entidad fuerte también (se marca como clave foránea además)
+\end{itemize}
+
+\medskip
+
+\textbf{Relaciones ternarias}
+
+\begin{itemize}
+\item En el caso de las relaciones ternarias N:N:N se ponen como clave las tres ids, y las tres son foreign key.
+\item En el caso 1:N:N se pone la relación con clave primaria de N y N, y la de 1 la tiene como foránea solo:
+\end{itemize}
+R(\underline{i}d\underline{A},\underline{\underline{i}d\underline{B}},\underline{\underline{i}d\underline{C}})
+
+\medskip
+
+\begin{itemize}
+\item En 1:1:N las relaciones tenemos:
+\end{itemize}
+R(\underline{i}d\underline{A},\underline{\underline{i}d\underline{B}},\underline{\underline{i}d\underline{C}}) o 
+R(\underline{\underline{i}d\underline{A}},\underline{i}d\underline{B},\underline{\underline{i}d\underline{C}})
+
+\medskip
+
+\begin{itemize}
+\item No podemos ahorrarnos la tabla ya que estaríamos forzando a que todos los elementos tengan una asociación
+\end{itemize}
+
+\begin{itemize}
+\item En 1:1:1 las claves candidatas son:
+\end{itemize}
+R(\underline{i}d\underline{A},\underline{\underline{i}d\underline{B}},\underline{\underline{i}d\underline{C}}) o 
+R(\underline{\underline{i}d\underline{A}},\underline{i}d\underline{B},\underline{\underline{i}d\underline{C}}) o
+R(\underline{\underline{i}d\underline{A}},\underline{\underline{i}d\underline{B}},\underline{i}d\underline{C})
+
+\medskip
+
+\begin{itemize}
+\item Todas son claves candidatas (las 3), la PK es solo una. Las claves candidatas son igual de importantes, quiero que todas se verifiquen. Elijo una como PK, pero las otras siguen estando (UNIQUE).
+\item En las especializaciones/generalizaciones (\textbf{caso disjunto y total (sin solapamiento)} - es uno o el otro), B es un A, y C es un A.
+\item Tenemos las tres entidades, B y C con sus atributos propios y no comunes.
+\item Los atributos comunes van en la tabla A. 
+\item En A se puede agregar un atributo \emph{tipo} para decir en que tabla voy a poder buscar el resto de la información. (como es total, esto se puede asegurar que el tipo no sea nulo)
+\end{itemize}
+
+
+\subsection*{Taller}
+
+\begin{itemize}
+\item Si es una restricción de PK se le agrega el prefijo 'pk\_' Se hace también para las foreign keys (fn\_). 
+\item Conviene definirlas como constraint, ya que es mas robusto que definirla en la creación inicial porque ante un error nos indica mas claramente el problema.
+\end{itemize}
+
+\medskip
+
+Ejemplo de agregado de una clave como CONSTRAINT (parte 2 y 4):
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+ALTER TABLE paradas ADD CONSTRAINT pk_paradas PRIMARY KEY(cod_parada);
+
+ALTER TABLE colectivos_por_parada ADD CONSTRAINT fk_colectivos_por_parada
+FOREIGN KEY(cod_parada) REFERENCES paradas(cod_parada);
+\end{minted}
+
+\medskip
+
+Intente provocar una violación a la restricción de integridad de entidad de
+la tabla colectivos por parada a través de un INSERT.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+INSERT INTO colectivos_por_parada VALUES(NULL,44)
+\end{minted}
+
+\medskip
+
+Intente provocar una
+violación a la restricción de integridad referencial definida, a través de un INSERT en la
+tabla que considere apropiada.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+INSERT INTO colectivos_por_parada VALUES(99999999,44);
+\end{minted}
+
+\medskip
+
+Intente provocar una violación a la restricción de integridad referencial definida, a través de un DELETE en la tabla
+que considere apropiada
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+DELETE FROM paradas WHERE cod_parada=1000086;
+\end{minted}
+
+\medskip
+
+Intente modificar el código de la parada 1004561 por el código 1007800
+utilizando un script de UPDATE. ¿Es posible hacerlo? No, es referida por la tabla colectivos\_por\_parada todavia.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+UPDATE paradas SET cod_parada=1007800 WHERE cod_parada=1004561;
+\end{minted}
+
+\medskip
+
+Formas de delete (aplican tambien al ON UPDATE):
+\begin{itemize}
+\item ON DELETE NO ACTION: Si hay referencias a otra tabla, no la borra.
+\item ON DELETE CASCADE: Elimina las referencias también (las tuplas) en forma de cascada sucesivamente
+\item Esta también SET NULL (cuidado si tenemos NOT NULL, sigue valiendo) y SET DEFAULT
+\end{itemize}
+
+\smallskip
+
+Las autoridades de la Dirección de Transito quieren que sea
+posible cambiar el código de una parada, modificando automáticamente todas las filas que
+hacen referencia a ella en otras tablas. Modifique para ello el script de CREATE TABLE,
+definiendo una CONSTRAINT de ON UPDATE en la tabla correspondiente.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+ALTER TABLE colectivos_por_parada ADD CONSTRAINT fk_colectivos_por_parada 
+FOREIGN KEY(cod_parada) REFERENCES paradas(cod_parada)
+ON UPDATE CASCADE;
+\end{minted}
+
+Es posible actualizar la tabla ahora.
+
+
+\newpage

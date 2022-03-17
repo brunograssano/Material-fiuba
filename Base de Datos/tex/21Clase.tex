@@ -1,0 +1,79 @@
+\section{Seguridad}
+
+Seguridad de la información: Es el conjunto de procedimientos y medidas para proteger a los componentes de los sistemas de información
+
+\medskip
+Implica:
+
+\begin{itemize}
+\item \textbf{Confidencialidad}: La información no sea ofrecida a individuos que no están autorizados a verla.
+\item \textbf{Integridad}: Asegurar la correctitud durante el ciclo de vida de la información. Por ejemplo alterar las notas
+\item \textbf{Disponibilidad}: Asegurar que la información este disponible cuando las personas autorizadas la requieran.
+\item \textbf{No repudio}: Alguien que accedió a la información no pueda negar haberlo hecho. Que quede un registro del acceso.
+\end{itemize}
+
+\medskip
+Hay que cubrir la información en distintos niveles (Personas, aplicaciones, red, OS, SGBD, archivos). Ahora nos focalizamos en lo que puede hacer el SGBD.
+
+\subsection*{Control de acceso basado en roles (RBAC)}
+Esta basado en definir roles para las distintas actividades y funciones desarrolladas por los miembros de una organización, con el objetivo de regular el acceso de los usuarios a los recursos disponibles
+
+\medskip
+Los elementos/entidades son:
+\begin{itemize}
+\item Usuarios: son las personas
+\item Roles:  son conjuntos de funciones y responsabilidades
+\item Objetos: son aquello a ser protegido
+\item Operaciones: son las acciones que pueden realizarse sobre objetos
+\item Permisos: Acciones concedidas o revocadas a un usuario o rol sobre un objeto determinado.
+\end{itemize}
+
+\newpage
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ModeloRBAC.png}
+\end{figure}
+
+
+Soporta tres principios:
+
+\begin{itemize}
+\item Criterio del menor privilegio posible, si un usuario no va a realizar una operación, no debería de tener los permisos para realizarla.
+\item División de responsabilidades, nadie debe de tener suficiente privilegios para usar el sistema en beneficio propio. Necesita de roles excluyentes. \textit{Por ejemplo, Que el pago de una factura a un proveedor requiera la aprobación de un empleado de Pagos y la carga de los datos de los proveedores deba realizarla un empleado de Compras.}
+\item Abstracción de datos: los permisos son abstractos, dependen del objeto en cuestión.
+\end{itemize}
+
+\newpage
+\subsection*{Autenticación y permisos en SQL}
+
+En Postgres el esquema queda de la siguiente forma:
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ModeloRBACPostgres.png}
+\end{figure}
+
+
+\begin{itemize}
+\item Postgres permite definir políticas a nivel de fila. Solo puede haber algunas filas según mis permisos al hacer un SELECT.
+\item Solo veo hasta donde tengo permisos al ver la tabla.
+\item Solo el dueño puede crear o borrar la tabla. Se puede cambiar el dueño. Lo mismo pasa con las databases y los esquemas. DROP y ALTER no son privilegios que pueden darse.
+\item El dueño de un objeto tiene todos los privilegios sobre el objeto, y puede extenderlos a los usuarios que desee.
+\item Los superusuarios tienen todos los privilegios sobre todos los objetos, y son irrevocables.
+\end{itemize}
+
+\subsection*{SQL Injection}
+Son una de las falla de seguridad más frecuentes en sistemas de bases de datos relacionales. Se manipula a nivel aplicación las variables de entrada de una consulta SQL. Sus consecuencias pueden ser graves.
+
+
+\medskip
+La solución es hacer todo lo que se pueda para evitarlo.
+
+\begin{itemize}
+\item Una solución es usar una función de escape sobre los parámetros.
+\item Otra es aprovechar los mecanismos de control de acceso. Desde afuera se conectan con algún usuario especifico al que controlamos los permisos.
+\item Validar los parámetros, castear cada dato al tipo correspondiente antes de anexarlo a la consulta.
+\item Usar consultas parametrizadas.
+\end{itemize}
+
+\newpage

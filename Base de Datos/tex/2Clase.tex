@@ -1,0 +1,88 @@
+\section{Practica: Ejercicio AFA y Taller I}
+% libro ] Fundamentals of Database Systems,Elmasri, S. Navathe
+
+\subsubsection*{Conceptos}
+\begin{itemize}
+\item Cardinalidad: primer termino mínimo, segundo máximo en la cardinalidad (de ambos lados)
+\item Conjunto de entidad
+\item Entidad
+\item Atributos (claves, otros)
+\item Semántica, el significado de la interrelación
+\item Interrelación
+\item Conjunto de interrelación
+\end{itemize}
+
+
+\subsubsection*{Notas}
+
+\begin{itemize}
+\item La cardinalidad máxima tiene que estar si o si, se describe con esta siempre. Para enriquecer se agrega la cardinalidad mínima
+\item Una entidad débil puede ser a su vez una entidad fuerte de otra.
+\item No puedo tener un 0 como cardinalidad mínima en una entidad fuerte por la dependencia existencial.
+\item Prestar atención a los sustantivos y a los verbos. Para ver cuales son las entidades mas visibles, se puede contar cuantas veces aparece un sustantivo.
+\item En el diagrama los sustantivos los ponemos en singular, cuando lo pasamos a la tabla los ponemos en plural generalmente.
+\item En las relaciones ternarias usamos solo las cardinalidades máximas.
+\item Por mas que se tenga la misma cardinalidad como mínima y máxima, se ponen ambas (1,1)
+\item Siempre tienen que estar los identificadores únicos.
+\item Tratar de no usar abreviaturas.
+\item Lo que no entra en el diagrama, se anota aparte (en el diccionario de datos)
+\end{itemize}
+
+
+
+\subsubsection*{AFA}
+\begin{itemize}
+\item Estamos modelando los torneos solamente. No irse de la narrativa de estos.
+\item Equipo y encuentro es una relación particular, una binaria que tratamos como ternaria. 
+\item En este caso usamos 2 binarias para evitar esa relación particular
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/EjercicioAFA.PNG}
+\end{figure}
+
+\subsubsection*{Taller}
+
+\begin{itemize}
+\item Usamos schemas para ordenar las tablas lógicamente. (tiene otros motivos de seguridad y demás también)
+\item Las primeras lineas usarlas para documentación. Nombre del archivo, resumen del script, fecha creado y modificado, y autor. (medio innecesario los últimos tres si se usa git)
+\end{itemize}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+DROP TABLE IF EXISTS paradas -- Buena practica
+
+CREATE TABLE paradas (
+	cod_parada integer NOT NULL,
+    longitud numeric NOT NULL,
+    latitud numeric NOT NULL,
+    tipo_parada varchar,
+    calle varchar,
+    altura integer,
+    entre1 varchar,
+    entre 2 varchar
+);
+
+ALTER TABLE paradas -- Se cambia el dueño de la tabla
+	OWNER TO postgres;
+\end{minted}
+
+\begin{itemize}
+\item Al hacer consultas siempre tratar de poner un limit, en caso de tener tablas grandes. \textit{Ejemplo:} \mint{sql}|SELECT ... limit 10;|
+\item Al trabajar con $csv$ tener cuidado con los '.' y ',' cuando tenemos numeros. Revisar tambien los simbolos que no sean estandar \textit{por ejemplo la 'ñ'}.
+\item Para exportar los archivos, irían a un lugar publico. \textit{En Windows: C:$\backslash$Users$\backslash$Public}
+\end{itemize}
+
+
+\textit{Articulo recomendado: \href{https://martinfowler.com/articles/evodb.html}{Evolutionary Database Design - Martin Fowler}}
+
+
+\newpage

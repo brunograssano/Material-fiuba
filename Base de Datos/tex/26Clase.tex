@@ -1,0 +1,70 @@
+\section{Practica: Resolución de consultas}
+\begin{itemize}
+\item Una consulta SQL se transforma en un árbol de consultas. Buscamos ver que árbol utilizar.
+\item Para calcular los costos nos interesa conocer los meta datos
+    \begin{itemize}
+    \item n: cuantas filas tiene
+    \item B: cuantos bloques tiene
+    \item F: factor de bloque, cuantas filas entran en un bloque
+    \item V: variabilidad de un atributo en una tabla (valores distintos)
+    \item Height: altura del índice
+    \end{itemize}
+\item Buscamos realizar las selecciones lo antes posible, reemplazar productos cartesianos y selecciones por juntas, proyectar atributos lo antes posible priorizando la seleccion y realizar las juntas más restrictivas primero.
+\item El objetivo es reducir el tamaño de relaciones intermedias
+\end{itemize}
+
+
+\subsection*{Selección}
+
+\begin{itemize}
+\item File Scan: Costo B(R), se recorre toda la tabla.
+\item Index Scan: height(idx) + variante dependiendo del índice
+\end{itemize}
+
+Siempre acordarse de redondear hacia un valor entero.
+
+\subsection*{Junta}
+\begin{itemize}
+\item Loops anidados: La cantidad de memoria ayuda mucho en los loops anidados
+\item Único loop: Es cuando tenemos un índice que podemos aprovechar. Arranca por el que no tiene el índice como para usar.
+\item Junta Hash: Surge de leer 3 veces ambas tablas 3 (B(R) + B(S))
+\end{itemize}
+
+
+Si es la misma tabla y se utiliza el mismo atributo de junta, solo carga la tabla una vez. No tendría sentido cargar devuelta la tabla.
+
+
+\subsection*{Pipelining}
+\begin{itemize}
+\item Se concatena la salida de un operador con la entrada de otro. El resultado de un operador será la entrada de otro operador.
+\item Puedo llegar a hacer un ahorro en el costo (puede aumentar el uso de memoria). Por ejemplo no tener que hacer una proyección extra.
+\item En vez de procesar completamente un operador y luego el siguiente, puede irse procesando parcialmente el resultado a medida que se arma
+\end{itemize}
+
+
+
+\subsection*{Estimación de cardinalidad}
+\begin{itemize}
+\item Para poder usar las fórmulas de operadores que trabajan con resultados de otros operadores, precisamos conocer la información que nos dan los metadatos
+\item Precisamos estimar la cantidad de filas n(R) 
+\item Algunas operaciones modifican F(R), se recalcula B(R)
+\end{itemize}
+
+
+
+\subsection*{Histogramas}
+\begin{itemize}
+\item Guardan la frecuencia de ciertos valores.
+\item Mantener actualizado el histograma es costoso.
+\item En general tiene una buena performance
+\end{itemize}
+
+
+
+
+
+
+Se trata de no utilizar operaciones en las dos tablas a la vez, se trabaja en una, se hace el join y se sigue trabajando.
+
+
+\newpage

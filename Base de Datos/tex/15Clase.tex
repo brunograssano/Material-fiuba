@@ -1,0 +1,174 @@
+\section{Bases de datos espaciales}
+\begin{itemize}
+\item Tenemos que ver las distorsiones que ocurren al pasar de un mapa geoide al plano. Introducción al tema de geodesia \href{https://www.ign.gob.ar/NuestrasActividades/Geodesia/Introduccion}{aquí}
+\item Las bases de datos espaciales (llamadas también geográficas) permiten representar en forma eficiente objetos definidos en un espacio geométrico. 
+\item Tienen 3 objetos simples (puntos, lineas, polígonos) y 2 complejos (objetos 3D, teselados).
+\item Son parte de un contexto más general, los sistemas de información geográfica GIS que permite almacenar y manipular datos geográficos y capturar, analizar y presentar visualmente datos geográficos.
+\end{itemize}
+
+
+\subsection*{Representaciones}
+Tenemos 2 representaciones posibles:
+
+\begin{itemize}
+\item En las representaciones vectorizadas los objetos se identifican con vectores que identifican los bordes. Tiene un alto nivel de detalle y es fácil de mantener y actualizar, pero tiene una pobre representación de datos continuos.
+\item En las rasterizadas los objetos se proyectan sobre una matriz de celdas. Se pueden representar datos continuos (Ej. elevación), se puede hacer un análisis cuantitativo de forma fácil, es fácil de renderizar. La desventaja es que el detalle depende de la resolución y que suelen ocupar mas espacio.
+\end{itemize}
+
+En general se trabaja con los dos tipos de imágenes juntas. (basemap) (Ej, poner un camino de GPS arriba de una imagen satelital.)
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/RepresentacionesImagenes.PNG}
+\end{figure}
+
+
+\subsection*{Simple Features}
+
+\begin{itemize}
+\item Define una representación textual estándar para los objetos genéricos. Se conoce como WKT (Well Known Text). Hay otra que es Well Known Binary Representation (WKB)
+\item Define cómo agregar funcionalidad espacial a las bases de datos a través de una representación vectorizada, especificando con notación UML.
+\end{itemize}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/SistemaGraficoBasesEspaciales.PNG}
+\end{figure}
+
+\begin{itemize}
+\item Sistema de coordenadas (spatial reference system) SRID, usamos el 4326 en el taller (usado por el sistema GPS)
+\item spatial\_ref\_sys tiene los sistemas referenciales que podemos usar.
+\item Para buscar y combinar objetos geograficos se utilizan estructuras eficientes. Por ejemplo kd-trees o R-trees.
+\end{itemize}
+
+
+\subsection*{Taller}
+
+\begin{itemize}
+\item Creamos base de datos, vamos a extensiones. Creamos una extensión postgis y otra postgis\_raster. Luego creamos las tablas, las importamos desde el postgis.
+\item Nos conectamos con la base de datos e importamos los archivos poniendo el SRID en la columna. Una vez que lo hacemos seleccionamos importar.
+\item Hacemos el refresh de las tablas en la base de datos y ya podemos ver los datos.
+\item Stack Builder para instalar paquetes al postgres.
+\item QGis para las imágenes satelitales, instalamos el complemento y vamos a administrar base de datos donde importamos el archivo de la imagen satelital.
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT gid, nombre_est, comuna, barrio, geom
+FROM primarias
+WHERE gid IN (2808, 1191, 190, 559, 1512)
+\end{minted}
+
+\subsubsection*{Obtener el área de todas las comunas expresada en hectáreas}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+SELECT comunas, area, ST_Area(geom::GEOGRAPHY)/10000 AS area_en_ha
+FROM comunas
+ORDER BY 1;
+\end{minted}
+
+No esperar encontrar geometrías exactas, puede no dar lo mismo que el valor que se tiene al calcular el área.
+
+
+\subsubsection*{¿Hay barrios que sean iguales a comunas? ¿Cuales?}
+Vemos si hay polígonos iguales.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT c.comunas, c.geom
+FROM barrios AS b, comunas AS c
+WHERE st_equals(c.geom, b.geom)
+ORDER BY 1 ASC
+\end{minted}
+
+Hay 3 en realidad pero da 1 debido a los errores en el calculo. Si queremos los otros 2 hay que 'perdonar' la superposición.
+
+\subsubsection*{Visualice la comuna 1 dentro del entramado de barrios}
+Ejemplo de unión de los barrios con la comuna.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT st_union(c.geom, b.geom)
+FROM comunas c, barrios b
+WHERE c.comunas=1
+\end{minted}
+
+\subsubsection*{Calcule la distancia entre todas las escuelas}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT p1.nombre_est, p2.nombre_est, ST_DistanceSphere(p1.geom,p2.geom)
+FROM primarias AS p1, primarias AS p2
+WHERE p1.gid < p2.gid
+ORDER BY 3 DESC
+\end{minted}
+
+
+\subsubsection*{Obtenga un ranking de las escuelas más aisladas}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT grid_1, estab_1, min(dist) AS distMin
+FROM distancias AS p1
+GROUP BY 1, 2
+ORDER BY 3 DESC
+\end{minted}
+
+
+\subsubsection*{Muestre las escuelas primarias y los radios censales}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT p.geom
+FROM primarias AS p
+UNION
+SELECT c.geom
+FROM censo_2010_cada AS c
+\end{minted}
+
+Escuelas en comuna 1 mostrando radios censales
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT p.geom
+FROM primarias AS p
+WHERE p.comuna = 1
+UNION
+SELECT ST_union(p.geom, c.geom)
+FROM primarias AS p, censo_2010_cada AS c
+WHERE p.ST_Within(p.geom, c.geom) AND p.comuna = 1
+\end{minted}

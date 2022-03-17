@@ -1,0 +1,255 @@
+\section{Practica: Agregación en MongoDB}
+
+\begin{itemize}
+\item Los operadores van dentro del aggregate.
+\item \$match nos permite realizar una query igual al find, es el filtrado
+\item \$group agrupa por uno o mas atributos aplicando funciones de agregacion (\$sum,\$avg,\$first)
+\item \$sort para ordenar los resultados
+\item \$limit para limitar la cantidad de resultados dados
+\item \$sample para que me de una muestra de resultados
+\item \$project para proyectar campos, decir si queremos que estén o no.
+\item \$unwind abre los documentos, si un documento tiene un vector, crearía un documento nuevo identico al del vector donde en vez del vector se tiene un item (por cada uno de los que tenga). Sirve si quiero reorganizar la información.
+\item Accedo a los valores del documento con \$, agrupo poniendo el atributo en el \_id
+\end{itemize}
+
+
+
+\subsubsection*{1 Hallar el nombre de usuario y la cantidad de retweets para los tweets con más de 100000 retweets}
+
+\begin{verbatim}
+db.tweets.aggregate(
+[{
+$match: {
+    retweet_count: {
+        $gt: 100000
+    }
+}},
+{
+    $project: {
+        _id: 0,
+        "user.name": 1,
+        retweet_count: 1
+    }
+}])
+\end{verbatim}
+
+\subsubsection*{2 Hallar los usuarios que hayan contestado (is reply status id != null) algún tweet, sea en español y sea entre las 12 y 13 hs. Ayuda: ISODate("2019-06-26T13:00:00.000Z")}
+
+\begin{verbatim}
+ db.tweets.aggregate(
+ [{
+ $match: {
+    lang: 'es',
+    created_at: {
+        $gt: ISODate('1029-06-26T12:00:00.000Z'),
+        $lt: ISODate('1029-06-26T13:00:00.000Z')
+    },
+    in_reply_to_user_id: {
+        $exists:true -----otra opcion $ne:null 
+    }
+}},
+{
+$project: {
+    _id:0,
+    "user.name":1
+    }
+}])
+\end{verbatim}
+
+\subsubsection*{3 Hallar un tweet de fecha más antigua}
+\begin{verbatim}
+[{
+$sort: {
+    created_at:-1
+}},
+{
+$limit: 1
+}]
+\end{verbatim}
+
+\subsubsection*{4 Mostrar de los 10 tweets con más retweets, su usuario y la cantidad de retweets. Ordenar la salida de forma ascendente}
+\begin{verbatim}
+[{
+$sort: {
+    retweet_count:1
+}},
+{
+$limit: 10
+},
+{
+$project: {
+    "user.name":1,
+    _id:0,
+    retweet_count:1
+    }
+}]
+\end{verbatim}
+
+\subsubsection*{5 Encontrar los 10 hashtags más usados}
+\begin{verbatim}
+[{
+$unwind: {
+    path: "$entities.hashtags",
+    preserveNullAndEmptyArrays: false
+}},
+{
+$group: {
+    _id: "$entities.hashtags.text",
+    cant: {
+        $sum: 1
+    }
+}
+}, 
+{
+$sort: {
+    cant: -1
+    }
+},
+{
+$limit: 10
+}]
+\end{verbatim}
+
+
+\subsubsection*{6 Encontrar a los 5 usuarios más mencionados. (les hicieron @)}
+\begin{verbatim}
+[{
+$unwind: {
+    path: "$entities.user_mentions",
+    }
+}, 
+{$group: {
+    _id: "$entities.user_mentions.id",
+    cant: {
+        $sum: 1
+    }
+    }
+}, 
+{$sort: {
+    cant: -1
+    }
+},
+{
+$limit: 10
+}]
+\end{verbatim}
+
+\subsubsection*{7 Para los tweets que empiezan con un hashtag, mostrar su índice y el hashtag}
+
+Se puede ver con el índice también para no usar regex
+\begin{verbatim}
+[{
+$unwind: {
+    path: "$entities.hashtags",
+    }
+},
+{$match: {
+    text: {$regex: RegExp('^#')}
+    }
+}, 
+{$project: {
+    _id:0,
+    "entities.hashtags.text":1,
+    "entities.hashtags.indices":1,
+    }
+}]
+\end{verbatim}
+
+\subsubsection*{8 Por cada usuario obtener una lista de ids de tweets y el largo de la misma}
+\begin{verbatim}
+[{$group: {
+  _id: "$user_id",
+  ids: {$push : "$_id"},
+  cant : {$sum : 1}
+}}, {}]
+\end{verbatim}
+
+
+\subsubsection*{9 Hallar la máxima cantidad de retweets totales que tuvo algún usuario}
+\begin{verbatim}
+[{$group: {
+  _id: {id:"$user_id",name : "$user.name"},
+  retweets: {$sum : "$retweet_count"}
+}}, 
+{$sort: {
+  retweets: -1
+}}, 
+{$limit: 1}]
+
+\end{verbatim}
+
+\subsubsection*{10 Hallar el usuario no verificado que tuvo mayor cantidad de tweets retweeteados}
+
+\begin{verbatim}
+[
+    {
+        '$match': {
+            'user.verified': False, 
+            'retweet_count': {
+                '$gt': 0
+            }
+        }
+    }, {
+        '$group': {
+            '_id': {
+                'id': '$user_id', 
+                'screen_name': '$user.screen_name', 
+                'name': '$user.name'
+            }, 
+            'retweets': {
+                '$sum': 1
+            }
+        }
+    }, {
+        '$project': {
+            '_id': 0, 
+            'id': '$_id.id', 
+            'screen_name': '$_id.screen_name', 
+            'name': '$_id.name', 
+            'retweets': 1
+        }
+    }, {
+        '$sort': {
+            'retweets': -1
+        }
+    }, {
+        '$limit': 1
+    }
+]
+
+\end{verbatim}
+
+\subsubsection*{11 Hallar para cada intervalo de una hora cuantos tweets realizó cada usuario}
+
+\begin{verbatim}
+[
+    {
+        '$group': {
+            '_id': {
+                'created_at': {
+                    '$hour': '$created_at'
+                }, 
+                'id': '$user_id', 
+                'screen_name': '$user.screen_name', 
+                'name': '$user.name'
+            }, 
+            'count': {
+                '$sum': 1
+            }
+        }
+    }, {
+        '$project': {
+            '_id': 0, 
+            'id': '$_id.id', 
+            'screen_name': '$_id.screen_name', 
+            'name': '$_id.name', 
+            'count': 1
+        }
+    }
+]
+
+\end{verbatim}
+
+
+
+\newpage

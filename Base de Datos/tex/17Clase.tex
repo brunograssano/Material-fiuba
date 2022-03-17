@@ -1,0 +1,140 @@
+\section{Practica: MongoDB}
+
+\begin{itemize}
+\item Orientada a documentos
+\item Sirve para información que subimos y bajamos por la Web.
+\item Usamos el formato JSON
+\item Los números son enteros o decimales.
+\item Es muy libre la estructura, puedo tener una colección donde cada documento sea distinto. No estamos obligados a tener esquemas.
+\item La desventaja es que voy a tener que realizar muchos más chequeos.
+\item Lo natural es tener todo junto.
+\item La ausencia de los datos no es algo que esta mal. A veces da mas información, por ejemplo la gente que no dice cuanto gana se sabe que generalmente es gente de ingresos altos.
+\item En SQL se ponen nulos para rellenar, en Mongo es con JSON igual, pero al trabajar con los datos hay que tener en cuenta las faltas. Si queremos evitar los nulos en SQL usamos nuevas tablas que se relacionen por la clave.
+\end{itemize}
+
+'Renombrando' queda:
+
+\begin{itemize}
+\item Una tabla es una colección ahora.
+\item Una fila es un documento.
+\item Una columna es un campo. (field)
+\item Un join es un documento embebido.
+\end{itemize}
+
+\subsection*{Sentencias CRUD}
+
+\begin{itemize}
+\item db.<collection>.find(<query>, <projection>)
+\item db.user.find(\{firstName:"Juan"\})
+\item El query es como el WHERE
+\item La proyección para decir que campos queremos ver. Con 0 no los vemos, con 1 si. Es como un SELECT.
+\item El id nos los trae siempre, si no lo queremos le tenemos que poner 0 si o si.
+\item Podemos hacer búsquedas más complejas con \$regex
+\item Tenemos and, or, eq, gt,ge,lt, lte.
+\item Se le puede poner un limite de la cantidad de elementos que queremos que nos traiga.
+\item Varias cosas más que se pueden ver de la documentación...
+\end{itemize}
+
+\subsection*{Taller}
+
+\subsubsection*{Mostrar el país cuya capital es Vienna}
+
+\begin{verbatim}
+db.countries.find({'capital':'Vienna'},{_id:0})
+\end{verbatim}
+
+\subsubsection*{Mostrar los países con un área igual o menor a 20}
+
+\begin{verbatim}
+db.countries.find({area: {$lte : 20}}, {_id : 0, "name.common" : 1})
+\end{verbatim}
+
+\subsubsection*{Mostrar todos los países de América}
+
+\begin{verbatim}
+db.countries.find({region: "Americas"}, {_id : 0, "name.common" : 1})
+\end{verbatim}
+
+\subsubsection*{Mostrar todos los países de América con un área menor a 100}
+
+\begin{verbatim}
+db.countries.find({region: "Americas", area: {$lt : 100}}, {_id : 0, "name.common" : 1})
+\end{verbatim}
+
+\subsubsection*{Mostrar los países que estén en Europa o que use el euro (código: EUR) como moneda oficial}
+
+\begin{verbatim}
+db.countries.find({$or:[{region:'Europe'},{currency:'EUR'}]},{_id:0,"name.common":1})
+\end{verbatim}
+
+\subsubsection*{Mostrar las capitales de los países que no usen el dolar estadounidense (código: USD) ni el dolar canadiense (código: CAD) como moneda oficial}
+
+\begin{verbatim}
+db.countries.find({$nor:[{'currency':'USD'}, {'currency':'CAD'}]},{_id:0})
+\end{verbatim}
+
+
+\subsubsection*{Mostrar los países que limitan con Francia o Polonia}
+
+\begin{verbatim}
+db.countries.find({'borders': {$in: ['FRA','POL']}},{'name.common':1})
+\end{verbatim}
+
+\subsubsection*{Mostrar los países que limitan con Francia y Polonia}
+
+\begin{verbatim}
+db.countries.find({\$and :[{'borders': {$in: ['FRA']}}, {'borders': {$in: ['POL']} }]},{'name.common':1})
+\end{verbatim}
+
+\subsubsection*{Mostrar los países cuyo nombre oficial contenga la palabra “Republic” y que tengan exactamente 3 países limítrofes}
+
+\begin{verbatim}
+db.countries.find({$and: [ {"name.official": {$regex: /^Republic/} },
+{ borders: {$size: 3 } } ] }, {_id:0, "name.common":1})
+\end{verbatim}
+
+
+\subsubsection*{Mostrar la cantidad de libros de m´as de 400 paginas y que tengan un solo autor}
+
+\begin{verbatim}
+
+db.books.find({$and:[{pageCount:{$gt:400}},{authors:{$size:1}}]})
+
+\end{verbatim}
+
+\subsubsection*{Mostrar en forma alfabética por t´ıtulo, los libros que en su t´ıtulo o en su descripción corta contengan la palabra “web”}
+
+\begin{verbatim}
+db.books.find({$or:[{title:{$regex:"web.*"}},{shortDescription:{$regex:"web.*"}}]})
+        .sort({title:1})    
+
+\end{verbatim}
+
+\subsubsection*{Mostrar el nombre y la cantidad de paginas de 12 libros publicados, ordenados descendentemente por su cantidad de paginas}
+
+\begin{verbatim}
+db.books.find({_id:0,title:1,pageCount:1})
+        .sort({pageCount:-1})
+        .limit(12)
+\end{verbatim}
+
+\subsubsection*{Mostrar los libros publicados entre 2008 y 2010 (inclusive), ordenados ascendentemente por su id.}
+
+\begin{verbatim}
+db.books.find({$and:[{publishedDate:{$gte:new Date("01-01-2008")}},{publishedDate:{$lt:new Date("01-01-2011")}}]})
+
+\end{verbatim}
+
+
+
+
+
+
+
+\noindent updateOne remplaza el JSON directamente, si queremos evitarlo hay que usar un parámetro adicional.
+
+\begin{verbatim}
+db.countries.deleteOne({"name.common":{$regex:"Falkland"}})
+\end{verbatim}
+
+\newpage

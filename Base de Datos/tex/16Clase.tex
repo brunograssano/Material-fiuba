@@ -1,0 +1,256 @@
+\section{NoSQL}
+
+\begin{itemize}
+\item No responden al modelo relacional.
+\item Surgen alrededor de los 2000 con la masificación de la Web y cambios tecnológicos.
+\item Necesidades de almacenar muchos datos. (Google, Amazon)
+\item Se tenían requerimientos
+\item Mayor escalabilidad para trabajar con grandes volúmenes de datos.
+\item Mayor performance en aplicaciones Web. Surge XML y JSON, formatos fáciles de serializar y procesar.
+\item Mayor flexibilidad sobre las estructuras de datos. Los SGBD relacionales son muy rígidos, agregar una columna puede ser muy costoso.
+\item Mayor capacidad de distribución. Viene de la mano con escalabilidad. Se busca mayor disponibilidad y tolerancia a fallas de parte del SGBD.
+\end{itemize}
+
+\medskip
+Los SGBD relacionales tiene limitaciones en cuanto a los joins de tablas, son costosos y el manejo de transacciones en forma distribuida no escala (Se vuelve difícil garantizar ACID cuando tenemos muchos nodos).
+
+\medskip
+Lectura sugerida: \href{https://www.enterpriseintegrationpatterns.com/ramblings/18_starbucks.html}{Starbucks Does Not Use Two-Phase Commit}
+
+\medskip
+
+Se tenían redes cada vez mas rápidas, almacenamiento mas barato, pero velocidad de procesamiento estancada. Se pueden revisar los números del cambio \href{https://colin-scott.github.io/personal_website/research/interactive_latency.html}{aquí}. Debido a esto surge la necesidad de bases de datos distribuidas.
+
+\medskip
+Las bases de datos NoSQL buscan aumentar la velocidad de procesamiento y la capacidad de almacenar información. Para ello implementan un sistema de gestión de bases de datos distribuido.
+
+\bigskip
+Para hablar de las bases de datos no sql se necesitan algunos conceptos:
+
+\begin{itemize}
+\item \textbf{Fragmentación}: repartimos el contenido en muchos nodos. En uno solo no nos entra. Es la tarea de dividir un conjunto de agregados entre un conjunto de nodos. Puede ser fragmentación horizontal (los agregados se reparten entre los nodos de manera que cada nodo almacena un subconjunto de agregados. Se asigna el nodo a partir del valor de alguno de los atributos del agregado) o vertical ( Distintos nodos guardan un subconjunto de atributos de cada agregado. Todos suelen compartir los atributos que conforman la clave - no es lo mas común) (En un solo nodo no nos entra, toma mucho tiempo)
+\item \textbf{Replicación}: si se cae uno que lo pueda manejar otro. Tiene varias ventajas, provee backup, repartir la carga de procesamiento, y garantizar la disponibilidad del sistema si se caen algunos nodos. El problema que genera es la consistencia de los datos. Cuando se usan solo como backup se dice replica secundaria. Cuando pueden hacer procesamiento también se conoce como replica primaria. La replica introduce el problema de consistencia, que un mismo item de datos tenga el mismo valor en todas las replicas. (A prueba de fallas)
+\item \textbf{Búsqueda (lookup)}: saber donde esta lo que necesito, que nodo tiene determinado dato. No esta este problema en una base de datos relacional. Se usan tablas de hash distribuidas.
+\item \textbf{Métodos de consistencia}: Que pasa si un mismo dato tiene valor distinto en distintos nodos. Puede suceder cuando los usuarios están modificando los datos. Tiene que haber una forma de controlar esto, que los usuarios se pongan de acuerdo o no pase. Surge por la replicación,
+\item \textbf{Métodos de acceso (Access method)}: Como llego dentro del nodo a la información que quiero de forma rápida. (LSM Trees y estructuras) diferenciales)
+\end{itemize}
+
+
+
+\subsection*{Clasificación}
+\subsubsection*{Clave-Valor}
+
+\begin{itemize}
+\item Almacenan vectores asociativos o diccionarios, es decir pares.
+\item Las claves son únicas (no puede haber 2 pares con la misma clave).
+\item Ejemplos son Dynamo y Redis.
+\item Operaciones: PUT un nuevo par, UPDATE par de la clave, DELETE par de la clave, GET par de la clave
+\item Las ventajas que tienen son: son simples, veloces (eficiencia de acceso sobre la integridad), y escalables (se provee replicación y se pueden repartir las consultas entre nodos).
+\item El objetivo es consultar y guardar grandes cantidades de datos.
+\end{itemize}
+
+\bigskip
+\textbf{Dynamo}\\
+\begin{itemize}
+\item Es el key-value de Amazon
+\item Esta orientada a una arquitectura orientada a servicio (SoA)
+\item La base de datos esta distribuida en un server cluster que posee servidores web, routers de agregación y nodos de procesamiento
+\item Para consistencia usa un modelo llamado consistencia eventual. Tolera pequeñas inconsistencias (valores distintos).
+\item De lookup usa un método de hashing consistente que reduce la cantidad de movimientos de pares necesarios cuando cambia la cantidad de nodos S. Hace que agregar nodos sea sencillo con un impacto mínimo.(no tiene nada que ver con la consistencia, solo minimiza la cantidad de movimientos)
+\item La función de hash consistente a partir de una clave $k$ devuelve un valor $h(k)$ entre 0 y $2^M -1$ en donde M representa la cantidad de bits del resultado (hashing). Este valor para un par representa en que nodo se almacena (tabla de hash distribuida)
+\item Al identificador de cada nodo de procesamiento (generalmente, su dirección IP) se le aplica la misma función de hash. Los nodos se van organizando virtualmente en una estructura de anillo por hash creciente. (para que si se cae alguno no reorganiza todo, si se cae alguno, el nodo siguiente se ocupa de los datos del nodo que se cayo)
+\item Los nodos tienen un listado de preferencia, indica cuales nodos va a replicar. Si se cae un nodo, otro nodo que no esta en este listado va a recibir los datos para mantener (el único movimiento que hay)
+\end{itemize}
+
+
+\subsubsection*{Orientadas a Documentos}
+
+\begin{itemize}
+\item Un documento es un agregado, la unidad estructural que contiene la información. 
+\item No tenemos un esquema rígido (columnas).
+\item Un agregado es un conjunto de objetos relacionados que se agrupan en colecciones para ser tratados como unidad y ser almacenados en un mismo lugar. \textit{Un post de FB con sus comentarios}
+\item Generalmente se representan con JSON, XML, YAML...
+\item Ejemplos son MongoDB, RavenDB...
+\end{itemize}
+
+
+\bigskip
+\textbf{MongoDB}\\
+\begin{itemize}
+\item Se basa en hashes para identificar los objetos.
+\item No usa esquemas pero se le pueden definir.
+\item Documentos son JSON.
+\item Organiza los datos de una base de datos en colecciones que contienen documentos.
+\item No esta pensado para operaciones de junta, en general se pone todo junto en los documentos.
+\item La agregación se implementa con un pipeline, uno va definiendo las operaciones a realizar en el. La salida de uno es la entrada de otro.
+\item Sharding es el modelo distribuido de procesamiento. Se basa en el particionamiento horizontal de las colecciones en chunks que se distribuyen en nodos llamados Shards. La idea de estos es que estén descentralizados.
+\end{itemize}
+
+El esquema de MongoDB se puede ver como:
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/MongoDB.PNG}
+\end{figure}
+
+
+\begin{itemize}
+\item Son los shards (fragmentos) que se distribuyen los chunks, los routers que reciben las consultas, y los servidores de configuración sobre los shards y routers.
+\item Mongo usa para particionar las colecciones una shard key. Es un atributo o conjunto de atributos.
+\item Es posible tener colecciones sharded y otras unsharded. Las unsharded se almacenan en un shard particular del cluster. (El shard primario)
+\item No es posible desfragmentar una colección ya fragmentada.
+\item Usar el sharding permite disminuir el tiempo de respuesta en sistemas con alta carga de consultas al distribuir el procesamiento entre varios nodos y ejecutar consultas sobre conjuntos de datos muy grandes. El objetivo es que la base de datos sea escalable.
+\item MongoDB nos permite que cada shard este replicado. Nos sirve para backup y responder consultas.
+\item El esquema de replicas es de master-slave with automated failover. Las replicas eligen entre si un master con un algoritmo distribuido. Si el master falla los slaves elijen a un nuevo master.
+\item Todas las operaciones de escritura se hacen sobre el master. Los slaves están como respaldo.
+\item Los clientes pueden especificar para mandar las consultas de lectura a los nodos secundarios.
+\item Durante operaciones de agregación, se puede dar el caso de que los nodos realice operaciones de forma paralela, y cuando no se pueda seguir de forma paralela (se necesita la información de los otros nodos) se le pasan al router para que lo termine la operación.
+\end{itemize}
+
+
+\subsubsection*{Wide Column}
+
+\begin{itemize}
+\item Evolución de las bases de datos de clave/valor.
+\item Un valor particular de la clave primaria junto con todas sus columnas asociadas forma un agregado análogo a la fila de una tabla. Pero además, estas bases permiten agregar conjuntos de columnas en forma dinámica a una fila, convirtiéndola en un agregado llamado fila ancha (wide row, el nombre quedo como wide column)
+\item Ejemplos son Google BigTable, Apache Cassandra...
+\end{itemize}
+
+\bigskip
+\textbf{Cassandra}\\
+\begin{itemize}
+\item No es estrictamente orientada a columnas.
+\item Usa esquemas.
+\item Tiene una arquitectura de share-nothing, no hay un estado compartido centralizado, todos los nodos son pares. Permite que sea muy escalable.
+\item Optimizado para ofrecer una alta tasa de escrituras.
+\item Cada columna es un par clave-valor asociado a una fila.
+\item Cada esquema puede estar distribuido en varios nodos.
+\item Es obligatorio definir una clave primaria.
+\item Cuando en una fila las columnas se repiten identificadas por el valor que toman las columnas clave, se dice que la fila se convirtió en una wide row (fila ancha).
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/EsquemaCassandra.PNG}
+    \caption{Esquema simple de Cassandra}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/EsquemaWideRow.PNG}
+    \caption{Esquema con Wide Row}
+\end{figure}
+
+\begin{itemize}
+    \item La clave primaria se divide entonces en clave de partición y de clustering. (La primaria permite identificar a la fila todavía)
+    \item Toda la wide-row se almacenara contigua en disco y la clave de clustering nos determina el ordenamiento interno de las columnas.
+    \item Restricciones sobre la clave primaria: los valores deben ser comparados por igual contra valores constantes en los predicados, si una columna que forma parte de una clustering key es usada como predicado, deben usarse las restantes columnas también.
+    \item No existe el concepto de junta.
+    \item No existe el concepto de integridad referencial.
+    \item Hay que pensar de antemano que consultas se van a realizar para diseñar las tablas. Se busca que cada consulta se resuelva accediendo a una unica column family, que los resultados esten en una unica particion, respetar las reglas del uso de la clave primaria.
+    \item Usa una estructura LSM-Tree que mantiene parte de los datos en memoria para diferir cambios sobre el indice en disco.
+    \item Se busca acceder en forma secuencial al disco.
+\end{itemize}
+
+\subsubsection*{Basadas en grafos}
+\begin{itemize}
+\item Los elementos principales son nodos y arcos (ejes)
+\item Estas bases resultan útiles para modelar interrelaciones complejas entre las entidades.
+\item Mantienen una referencia a sus nodos adyacentes.
+\item Se almacena como una lista de adyacencias
+\item Sirve para encontrar un patrón de nodos conectados entre si, un camino entre nodos, la ruta mas corta, calcular medidas de centralidad asociadas a los nodos.
+\end{itemize}
+
+
+\bigskip
+\textbf{Neo4j}\\
+\begin{itemize}
+\item Tiene soporte para ACID
+\item Formada por nodos que pueden tener distintos labels. 
+\item Dentro de cada label el nodo tiene un conjunto de propiedades. Esta estructura no es rígida.
+\item Los ejes son siempre direccionales, si se quiere trabajar con no dirigidos no se crean las interrelaciones en ambos sentidos.
+\item Un patrón (pattern) puede especificarse a través de un nodo y sus propiedades, una interrelación y sus propiedades, o un camino y sus propiedades. A cada patrón podemos darle un nombre. 
+\item Las funciones de agregación se realizan en el RETURN.
+\end{itemize}
+
+\subsection*{Consistencia}
+\subsubsection*{Consistencia secuencial}
+
+\begin{itemize}
+\item Es el provisto por las bases de datos centralizadas.
+\item Se dice que una base de datos distribuida tiene consistencia secuencial cuando “el resultado de cualquier ejecución concurrente de los procesos es equivalente al de alguna ejecución secuencial en que las instrucciones de los procesos se ejecutan una después de otra”
+\item Garantizar consistencia secuencial es costoso, ya que requiere de mecanismos de sincronización fuertes que aumentan los tiempos de respuesta.
+\end{itemize}
+
+\subsubsection*{Consistencia causal}
+
+\begin{itemize}
+\item Busca captar eventos que puedan estar causalmente relacionados
+\item Si un evento b fue influenciado por un evento a, la causalidad requiere que todos vean al evento a antes que al evento b.
+\item Dos eventos que no estén causalmente correlacionados se dicen concurrentes. No se tienen restricciones en este caso.
+\end{itemize}
+
+\subsubsection*{Consistencia eventual}
+
+\begin{itemize}
+\item En algún momento los nodos se van a poner de acuerdo. Se basa en que son pocos los procesos que realizan modificaciones o escrituras mientras que la mayor parte solo lee.
+\item Deja que pase y después se vea como resolverlo, eventualmente todas las replicas son consistentes.
+\item Dynamo provee este sistema. 
+\begin{itemize}
+\item Se definen dos parámetros adicionales debido a que puede darse el caso de que se lea un valor desactualizado.
+\item $W \leq N$: Quorum de escritura, se devuelve que la lectura fue exitosa cuando otros $W-1$ nodos confirman el valor. W=2 es el mínimo.
+\item $R \leq N$: Quorum de lectura, se devuelve éxito cuando se tienen R nodos distintos. Generalmente R = 1 es suficiente. Valores mayores de R brindan tolerancia a fallas como corrupción de datos ó ataques externos, pero hacen más lenta la lectura
+\item En Dynamo hay que tener en cuenta que no hay funciones de agregación, se implementan a mano o se usan herramientas que envuelven a Dynamo (Ej Spark).
+\end{itemize}
+\end{itemize}
+
+\subsection*{Arboles}
+\subsubsection*{Log Structured Merge Trees LSM-trees}
+\begin{itemize}
+\item Ofrece escrituras secuenciales (El B-Tree es de acceso aleatorio), es mucho más rápido que tener que posicionarse en el disco. (El B-Tree es peor para escritura, el costo de escritura es alto porque me estoy moviendo todo el tiempo en disco.)
+\item La desventaja es que a veces se pierde tiempo cuando los datos no están cacheados. La lectura es más torpe. (El B-Tree es mejor para lectura)
+\item Es usado por Cassandra, Mongo...
+\end{itemize}
+
+\subsection*{Map Reduce}
+\begin{itemize}
+    \item Es una técnica que brinda un marco flexible para el procesamiento paralelo de grandes volúmenes de datos.
+    \item Divide la entrada en partes mas pequeñas que puedan ser ejecutadas por unidades de procesamiento para luego integrar el resultado a la salida.
+    \item Map devuelve una secuencia de clave/valor
+    \item Reduce recibe una clave con sus valores y devuelve valores.
+\end{itemize}
+
+
+\subsection*{Teorema CAP}
+Es un teorema que postula la imposibilidad de que un sistema distribuido garantice simultaneamente el maximo nivel de:
+\begin{itemize}
+    \item Consistencia (Se muestre un único valor, requiere mucha sincronización)
+    \item Disponibilidad (Cada consulta que llegue a un nodo no caido devuelva un resultado sin errores)
+    \item Tolerancia a fallas (Que se pueda responder a consultas aun cuando algunos nodos estan caidos.)
+\end{itemize}
+
+A lo sumo podemos ofrecer 2 de las 3 garantias
+
+
+\bigskip
+En la realidad no es factible garantizar que una red no se
+particione, con lo cual nuestro sistema deberá necesariamente
+ser tolerante a particiones. Nos obliga entonces a encontrar una
+solución de compromiso entre consistencia y disponibilidad
+
+\subsection*{BASE}
+\begin{itemize}
+ \item (BA) Disponibilidad básica (basic availability): El SGBD distribuido
+está siempre en funcionamiento, aunque eventualmente puede
+devolvernos un error, o un valor desactualizado.
+
+ \item (S) Estado débil (soft state): No es necesario que todas los nodos
+réplica guarden el mismo valor de un ítem en un determinado
+instante. No existe entonces un “estado actual de la base de datos”
+
+ \item (E) Consistencia eventual (eventual consistency): Si dejaran de
+producirse actualizaciones, eventualmente todos los nodos réplica
+alcanzarían el mismo estado.
+\end{itemize}
+
+
+\newpage

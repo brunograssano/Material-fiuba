@@ -1,0 +1,128 @@
+
+\section{Practica: Taller Valores Nulos}
+
+\begin{itemize}
+\item La política del estándar del NULL es ignorarlo en las consultas. Si son todos NULL, ahi da NULL.
+\item Código para crear las tablas e insertar los valores.
+\end{itemize}
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+CREATE TABLE  clientes (
+  cod_cliente integer             NOT NULL,
+  nombre      character varying   NOT NULL,
+  saldo       float8              NULL    ,
+  localidad   character varying   NULL  
+)
+\end{minted}
+
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+INSERT INTO clientes(
+	cod_cliente, nombre, saldo, localidad)
+	VALUES (10, 'Juan' , 20    , NULL ),
+	       (20, 'Pablo', 40    , NULL ),
+	       (30, 'Ana'  , NULL  , 'Mar del Plata')
+	;
+\end{minted}
+
+\medskip
+2) Las preguntas pasan a tener distinto significado con valores nulos, cambia la semántica.
+\begin{enumerate}
+\item El saldo total de los clientes es 60
+\item Matemáticamente el saldo de Ana tiene que ser 0. Aun ignorando los valores nulos estos afectan en cierta forma.
+\item Depende de la politica. Da 30, ignora los valores nulos. Para que sea correcto Ana deberia de tener saldo 30. (Llegamos a un absurdo, tiene 0 en uno, 30 en este)
+\item Maximo 40, minimo 20. Estan condicionando el saldo de Ana dentro de estos limites.
+\end{enumerate}
+
+\medskip
+3) En el orden hay 3 políticas, los deja al final, al comienzo, o lo deja donde lo encontró. Esto tiene implicaciones también.
+
+\medskip
+4) La consulta nos da en realidad los clientes que \textbf{sabemos que viven} en Mar del Plata, no nos da todos.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT *
+FROM clientes
+WHERE localidad ILIKE 'mar del plata';
+\end{minted}
+
+\medskip
+5) El conjunto mas su complemento no me pueden dar el universo. Esto es por los valores nulos.
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT *
+FROM clientes
+WHERE localidad ILIKE 'mar del plata'
+UNION
+SELECT *
+FROM clientes
+WHERE localidad NOT ILIKE 'mar del plata';
+\end{minted}
+
+\medskip
+\begin{itemize}
+\item NULL esta en el rango? Da NULL, no lo toma.
+\item Hay que tener mucho cuidado al pasar de un diseño sin valores nulos a uno con nulos.
+\end{itemize}
+
+\medskip
+8) Una tautología puede dar falso debido a los valores nulos
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+--  E8 (Una Tautologías puede dar Falso!) 
+--  idea  adaptad de : C. J. Date-SQL and Relational Theory-O'Reilly (2012)
+-- Ejecute la sentencia:
+DELETE FROM taller_05.fabricas WHERE cod_fabrica = 40;
+-- Luego obtenga todos los pares (cod cliente, cod fabrica) tales que
+-- no se encuentren en la misma ciudad, o bien la fabrica no se encuentre
+-- en Rosario. Analice el resultado e indique si el mismo se contrapone a la realidad.
+-- veamos esta consulta:
+SELECT cod_cliente, cod_fabrica
+FROM taller_05.clientes c , taller_05.fabricas f
+WHERE c.localidad <> f.localidad
+   OR f.localidad <> 'ROSARIO'
+   
+-- estudiemos estos dos predicados:  
+--   (c.localidad <> f.localidad)  OR  (f.localidad <> 'ROSARIO')  
+-- cual es la respuesta?
+-- pero si en el mundo real suponemos :
+--  H0: la fabrica 50 esta en Rosarios
+--  H1: la fabrica 50 no esta en Rosario
+-- observar que  en el mundo real no existe otra hipotesis posible!
+-- entonces:
+-- si se cumple la la H0: el primer predicado es Verdadero y el segundo predicado es Falso 
+-- y me da ANA (<30 , 50>)
+-- si se cumple la H1: el primer predicado es Falso y el segundo predicado es Verdadero 
+-- y en este caso me deberia dar  a los tres clientes con la f 50
+-- por lo tanto este predicado es una tautologia y siempre sera verdadero.
+-- Sin embargo SQL nos devuelve un valor  que no se corresponde con el mundo real
+\end{minted}
+\newpage
+
+

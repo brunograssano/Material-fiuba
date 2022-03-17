@@ -1,0 +1,104 @@
+\section{Practica: Normalización II}
+\subsection*{Algoritmo de descomposición en 3FN}
+
+Este algoritmo es constructivo, garantiza la preservación de dependencias y la información (por incluir una clave del esquema original)
+Entra un esquema R y salen varios Ri en 3FN que preservan información y dependencias funcionales.
+\begin{enumerate}
+\item Buscamos un conjunto minimal para F
+\item Encontramos las claves de R
+\item Para cada dependencia funcional $X\rightarrow A_i$ en $F_{min}$ creamos un esquema que tenga a X y a $A_i$.
+\item Si ningún esquema de los generados contiene una clave de R, se crea un esquema adicional que contenga atributos que formen una superclave de R. Necesitamos encontrar por lo menos una en las relaciones resultantes.
+\item Opcional, pero bueno, es unir los esquemas que tengan la misma clave primaria.
+\end{enumerate}
+
+\medskip
+Un problema del algoritmo es que puedo fragmentar demasiado, tener muchos esquemas chicos.
+
+
+% R(ABCDE)
+% AB->C , A->D , BD->C
+% donde tengo D, puedo poner A
+% cc = ABE
+% Fmin = A->D, BD->C
+% estamos en 1ra forma normal
+% lo descomponemos
+% R1(AD) A->D
+% R2(BCD) BD->C
+% R3(ABE) cc=ABE - como la cc no estaba en ninguno creamos una relacion mas, sin esto no sirve la descomposicion
+
+
+% R4(ABCDEGH)
+% Fmin = c->e,g->a,b->d,h->a,h->e,bc->g,acd->g,abe->h,gh->c,gh->b
+% cc = bc, beg, cdh, gh
+% R1(CE) c->e
+% R2(GA) g->a ESTA INCLUIDO EN R7
+% R3(BD) b->d
+% R4(HA) h->a POSIBLE UNION CON R5
+% R5(HE) h->e
+% R6(BCG) bc->g <- CLAVE CANDIDATA
+% R7(ACDG) acd->g
+% R8(ABEH) abe->h
+% R9(GHC) gh->c TIENE MISMA CLAVE PRINCIPAL CON R10D
+% R10(GHB) gh->b
+
+\subsection*{Algoritmo de descomposición de FNBC}
+Tiene la propiedad NJB (comprobación de concatenación no aditiva para descomposiciones binarias) si y solo si la df entre las relaciones R1 y R2 implican la resta de R1 con R2, o R2 con R1 esta en la clausura transitiva de F.
+
+Cuando descomponemos puede pasar que perdamos df. Se garantiza que se mantiene la información por propiedad NJB.
+
+Entra un esquema R y salen varios Ri en FNBC que preservan información.
+
+Vemos en que FN esta, y ahi decidimos si corresponde aplicar el algoritmo.
+\begin{enumerate}
+\item Establecemos D=$\{R\}$
+\item Mientras que exista un esquema Q en D que no este en FNBC
+\begin{enumerate}
+    \item Escogemos Q en D que no este en FNBC
+    \item Encontrar una dependencia funcional $X\rightarrow Y que viole FNBC$
+    \item Reemplazamos Q en D por dos esquemas. Un esquema es $R_1 =\{X\}^+ S_1 =proyección S en R_1$ y el otro $R2=\{Q - \{X\}^+ \cup X\} S_2 =proyección S en R_2$
+\end{enumerate}
+\item Procesar recursivamente R1 y R2
+\end{enumerate}
+
+\medskip
+El resultado es que se va formando un árbol. Este conviene dibujarlo para no perderse.
+
+Cuando descomponemos puede que perdamos
+df’s, pero también puede que en los nuevos
+esquemas se puedan representar otras
+dependencias que no estén explicitadas en
+nuestro conjunto de df´s, pero que
+implícitamente existan. Entonces debemos
+proyectar nuestro conjunto de df´s en el nuevo
+conjunto.
+
+% para el parcial marcar el resultado
+% tener bien por lo menos un ej de cada tema
+
+\subsection*{Algoritmo Tableau}
+Detecta perdida de información. Lo hace mapeando todas las descomposiciones de R y luego se va operando con las dependencias funcionales para tratar de reconstruir la relación universal. Si podemos reconstruirla no hubo perdida de información. Este método es una simplificación del método Chase
+
+\begin{itemize}
+\item Entra una relación, sale un si o un no. 
+\item Construimos una matriz con NFIL y NCOL, la columna k corresponde al atributo Aj y la fila i corresponde al esquema Ri de PROY. Los valores de las columnas, para cada una de las filas Ri de la matriz, se rellenan de la siguiente forma:
+\begin{itemize}
+\item Si Aj está en Ri, MATij=Aj
+\item Si Aj no está en Ri, MATij=biAj
+\end{itemize}
+\end{itemize}
+
+\medskip
+Luego vamos aplicando las dependencias funcionales. 
+Tenemos que lograr que una fila con todos los atributos.
+
+\medskip
+Donde participa cada atributo en las relaciones, pongo las letras correspondientes a esos atributos en la matriz, el resto lo relleno con bij.
+
+\medskip
+Aplicamos dependencias, donde tengo mismos valores, tiene que implicar lo mismo, remplazando los valores (priorizamos las mayúsculas). (Queremos lograr una fila con letras mayúsculas) (Si la implicación tiene mas de un atributo de un lado, buscamos esa cantidad, esos pares tienen que ser iguales)
+
+\medskip
+No importa el orden en que apliquemos las dependencias, es recursivo, ante cualquier cambio hay que volver a aplicar todas las dependencias. 
+
+
+\newpage

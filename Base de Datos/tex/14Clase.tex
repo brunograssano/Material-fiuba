@@ -1,0 +1,247 @@
+\section{Concurrencia y Transacciones}
+
+El interés de la concurrencia surge de aprovechar la capacidad de procesamiento lo mejor posible para atender a los usuarios. Que no estén en una cola de espera.
+
+Tenemos sistemas monoprocesador que permiten hacer multitasking (varios hilos o procesos) y sistemas multiprocesador o distribuidos (varias unidades de procesamiento o nodos que replican la base de datos en distintas unidades de procesamiento). Aun con multiprocesador la concurrencia nos puede hacer ganar. Se mejora el response time al solapar las tareas.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\textbf{Transacción} es una unidad lógica de trabajo compuesta por una secuencia de instrucciones atómicas (no se pueden dividir). Pueden ser operaciones de consulta o ABM. Queremos que se ejecuten por completo o que no se ejecuten. No queremos que queden por la mitad.
+
+\medskip
+
+La \textbf{concurrencia} es la posibilidad de ejecutar múltiples transacciones en forma simultanea (tareas). Vamos a querer aprovechar toda la capacidad de computo.
+El problema que genera la ejecución concurrente es la gestión de los recursos compartidos. Al nivel de los SGBDs los recursos compartidos son los datos, a los cuales distintas transacciones quieren acceder en forma simultanea.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+El modelo de procesamiento que usaremos es el de concurrencia solapada que considera que:
+\begin{itemize}
+\item Hay un solo procesador.
+\item Cada transacción esta formada por instrucciones atómicas.
+\item El scheduler puede suspender en cualquier momento las instrucciones.
+\end{itemize}
+
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\textbf{Item}: Puede representar el valor de un atributo en una fila determinada de una tabla, una fila de una tabla, un bloque del disco, una tabla. El tamaño de este se conoce como \textbf{granularidad}, afecta sustancialmente al control de concurrencia.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+Las instrucciones atómicas serian:
+\begin{itemize}
+\item leer\_item(X) lee el valor de X cargándolo en memoria
+\item escribir\_item(X) ordena escribir el valor que esta en memoria del item X en la base de datos
+\end{itemize}
+
+Hay que tener en cuenta que:
+\begin{itemize}
+\item En el medio de las instrucciones se realizan otras operaciones en el CPU que no nos afectan al análisis de concurrencia. (Por ejemplo una junta en memoria)
+\item Ordenar escribir no necesariamente lleva a disco. (puede quedar en un buffer)
+\end{itemize}
+
+
+\subsection*{Propiedades ACID}
+
+El gestor tiene que garantizar estas propiedades en todo momento.
+
+\begin{itemize}
+\item \textbf{Atomicidad}: Las transacciones deben ejecutarse de forma atómica, se ejecutan o no. (El usuario las ve de esta forma) (se garantiza con el log)
+\item \textbf{Consistencia}: Cada ejecución debe preservar la consistencia de los datos. Se define con reglas de integridad (se deben de verificar en todo momento, ej. no puede haber mas de un gerente por departamento).
+\item \textbf{Aislamiento}: El resultado de la ejecución concurrente de las transacciones debe ser el mismo que si las transacciones se ejecutaran en forma aislada una tras otra, es decir en \textbf{forma serial}. La ejecución concurrente debe entonces ser equivalente a alguna ejecución serial. Lo que percibe el usuario de datos. Si el gestor cumple con el aislamiento y miro un valor en la base de datos con un solapamiento, este debe de tener el mismo valor si fuera serial la ejecución (una transacción después de otra) (en alguno de todos los ordenes posibles que hay) (se garantiza con el log)
+\item \textbf{Durabilidad}: Una vez que el SGBD informa que la transacción se completo, debe garantizarse la persistencia de la misma independientemente de toda falla que pueda ocurrir. (se garantiza con el log, deshace o rehace con lo que le dice)
+\end{itemize}
+
+
+
+Las propiedades se garantizan con mecanismos de recuperación. Buscan garantizar la visión de todo o nada de las transacciones. Se agregan algunas instrucciones especiales
+\begin{itemize}
+\item \textbf{begin}: se comenzó la transacción.
+\item \textbf{commit}: se termino con éxito.
+\item \textbf{abort}: ocurrió un error y todos los efectos de la transacción deben ser deshechos. (rollback)
+\end{itemize}
+
+
+Estos mecanismos de recuperación se van registrando en un archivo. Esto permite cumplir ACID. Si ocurre una falla, el log le dice como volver atrás. Siempre se tiene que escribir a disco, se suele usar uno especial de acceso rápido que se escribe en forma secuencial. No es lo mismo que estar escribiendo a la base de datos en disco. Cada cierto tiempo este log se va limpiando.
+
+\subsection*{Anomalías}
+Son situaciones que pueden violar ACID. Les decimos anomalía cuando ya no se puede arreglar, si se puede arreglar lo que paso se llama fenómeno.
+
+\subsubsection*{Dirty read}
+\begin{itemize}
+\item Sucede cuando una transacción lee un valor modificada por otra transacción \textbf{que aun no se commiteo}. Se conoce también como Read uncommitted data. Es un conflicto de escritura lectura (WR). (Si aborta la transaccion que lo modifico al dato se produce la anomalia)
+\item No tiene solución una vez que pasa, arruina la consistencia de la base de datos.
+\item La forma de evitarlo es no permitir que la transacción haga commit hasta que la otra haga abort o commit. La otra opción es que no lea, pero es mas drástica esta solución.
+\end{itemize}
+
+
+
+\subsubsection*{Actualización perdida - lost update}
+\begin{itemize}
+\item Alguien escribió lo que otro ya había leído, deriva en una anomalía si después el primero vuelve a escribir (lost update) o vuelve a leer (lectura no repetible).
+\item Se pisa una modificación con algo ya leído. Si la primera transacción luego modifica y escribe lo que se leyó y se pierde por otra transacción.
+\item Puede pasar que esa misma transacción vuelva a leer el mismo item y tiene algo distinto, causando una rotura del aislamiento (no hay ningún orden serial en el cual pueda pasar esto). (unrepeatable read)
+\item Ambas situaciones se conocen como RW (read write) seguido por otro de tipo WW o WR.
+\item Ej. Una transaccion deposita 100\$ y otra retira \$100, en este caso el cambio debería de ser 0, pero puede pasar que aparezcan -100 o +100.
+\item Rompe el aislamiento, no tiene un orden serial, no es serializable.
+\end{itemize}
+
+
+\subsubsection*{Dirty write}
+Ocurre cuando una transacción T2 escribe un item que ya había sido escrito por otra transacción T1 que luego se deshace. Se conoce como WW (write-write) o Overwrite uncommited. El gestor cuando aborte va a intentar poner el valor que habia antes, pisando lo que hizo otro.
+
+
+\subsubsection*{Phantom}
+\begin{itemize}
+\item \textit{Aparecen y desaparecen cosas en la base de datos}
+\item Transacción T1 que observa un conjunto de items que cumplen una condición y luego el conjunto cambia porque algunos de sus items fueron modificados/creados/eliminados. Si esto sucede mientras T1 se esta ejecutando podría encontrarse con un conjunto que cambio.
+\item Si está modificación se hace mientras T1 aún se está ejecutando, T1 podría encontrarse con que el conjunto de ítems que cumplen la condición cambió.
+\item Atenta contra la serializabilidad. Para evitarlo es necesario usar locks a nivel de tabla o predicado.
+\end{itemize}
+
+
+\subsection*{Notación}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/NotacionConcurrencia.jpg}
+\end{figure}
+
+\begin{itemize}
+\item No nos importan las operaciones que realiza en memoria.
+\item Un \textbf{solapamiento} entre dos transacciones T1 y T2 es una lista de m(T1) + m(T2) instrucciones, en donde cada instrucción de T1 y T2 aparece una única vez, y las instrucciones de cada transacción conservan el orden entre ellas dentro del solapamiento.
+\item Cantidad de solapamientos posibles: $ \frac{(m(T_1) + m(T_2))!}{m(T_1)!\ m(T_2)!}$
+\item Nos interesa ver si el solapamiento es serializable
+\end{itemize}
+
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\textbf{Ejecución serial} es aquella en que las transacciones se ejecutan por completo una detrás de otra en base a algún orden. Existen $n!$ ejecuciones seriales distintas.
+
+Decimos que un solapamiento de un conjunto de transacciones
+T1, T2, ..., Tn es \textbf{serializable} cuando la ejecución de sus
+instrucciones en dicho orden deja a la base de datos en un
+estado \textbf{equivalente} a aquél en que la hubiera dejado alguna
+ejecución serial de T1, T2, ..., Tn. Nos interesa esto porque garantizan la propiedad de aislamiento de las transacciones.
+
+\noindent\rule{\textwidth}{0.5pt}
+
+\subsection*{Equivalencia}
+\begin{itemize}
+\item Por \textbf{resultados}, mi ejecución de solapamiento da lo mismo \textbf{para un estado inicial particular}.  Cuando, dado un estado inicial particular, ambos órdenes de ejecución dejan a la base de datos en el mismo estado. (Es una equivalencia mas floja)
+\item Por \textbf{conflictos}, implica la de por resultados (no al revés), no depende del estado inicial. Cuando ambos órdenes de ejecución poseen los mismos conflictos entre instrucciones. (Da lo mismo, es serializable independientemente de los valores) (El solapado como el serial tienen los mismos conflictos) \textbf{No dependen del estado inicial}
+\item De \textbf{vistas}, es una intermedia, más débil que la de conflictos, más fuerte que la de resultados. Cuando en cada orden de ejecución, cada lectura RTi(X) lee el valor escrito por la misma transacción j, WT(X). Además se pide que en ambos órdenes la última modificación de cada ítem X haya sido hecha por la misma transacción.
+\end{itemize}
+
+
+\subsection*{Conflicto}
+Dado un orden de ejecución, un conflicto es un par de instrucciones (I1, I2) ejecutadas por dos transacciones distintas Ti y Tj, tales que I2 se encuentra más tarde que I1 en el orden, y que responde a alguno de los siguientes esquemas:
+\begin{itemize}
+\item una transacción escribe un item que otra leyó. (Ri, Wj)
+\item una transacción lee un item que otra escribió. (Wi, Rj)
+\item dos transacciones escriben un mismo item. (Wi, Wj)
+\end{itemize}
+
+Todo par de instrucciones consecutivas (I1, I2) de un solapamiento con transacciones distintas que no constituye un conflicto puede ser invertido en su ejecución. (Tienen que estar pegadas las instrucciones) Haciendo este swap podemos llegar a el orden serial.
+
+\subsection*{Grafo de precedencias}
+\begin{itemize}
+\item Nos dice si hay conflictos, no los evita.
+\item Queremos ir swappeando y llegar a que quede toda la transacción 1 a la izquierda.
+\item Buscamos evaluar si un solapamiento es serializable o no.
+\item Los nodos son transacciones y se agrega un arco entre los nodos i,j si existe algún conflicto de los mencionados. (WR,RW,WW)
+\item Opcionalmente se etiqueta el arco con el item que causa el conflicto.
+\item Si el grafo tiene ciclos, no es serializable.
+\item Un orden de ejecución es serializable por conflictos si y solo si su grafo de precedencias no tiene ciclos.
+\item Algoritmo de ordenamiento topológico si tengo un grafo acíclico y quiero el orden.
+\end{itemize}
+
+\subsection*{Control de concurrencia}
+
+Tenemos dos formas:
+\begin{itemize}
+\item Enfoque pesimista, busca garantizar que no se produzcan ciclos de conflictos.
+\item Enfoque optimista consiste en dejar hacer a las transacciones y deshacer (rollback) una de ellas si en fase de validación se descubre un conflicto.
+\end{itemize}
+
+\subsubsection*{Basado en locks}
+
+\begin{itemize}
+\item El objetivo es usar locks para bloquear a los recursos (items) y no permitir que más de una transacción los use en forma simultanea.
+\item Los inserta el SGBD como instrucciones especiales.
+\item No es trivial el agregado de estos.
+\item (Lock y Unlock) tienen carácter bloqueante, cuando lo adquiero nadie mas puede adquirir un lock sobre el mismo item hasta que no se libere. (debe de ser atómico el lock - Sistemas Operativos)
+\item Hay locks de varios tipos, los principales son de escritura (acceso exclusivo) y de lectura (acceso compartido)
+\item No alcanza con usar locks por si solo.
+\item \textbf{No puedo adquirir un lock luego de desbloquear un lock.} (Protocolo de lock de 2 fases - 2PL) Los unlock/lock los puedo poner donde quiera mientras no haga lock despues de un unlock
+\item El protocolo nos dice que va a ser serializable, pero puede ocurrir un deadlock (un conjunto de transacciones quedan bloqueadas entre ellas bloqueadas a la espera de recursos que otra transacción posee.) Se pueden prevenir tomando todos los locks que se necesitan de forma preventiva, la desventaja es que no sabemos todo lo que vamos a necesitar. Se puede definir un ordenamiento de los recursos y timestamps también.
+\item Se utiliza el grafo de alocación de recursos para detectar deadlocks. Si encontramos un ciclo en el grafo tenemos un deadlock.
+\item Puede hacer inanición.
+\item No resuelve generalmente la lectura sucia, las otras si.
+\item Estructura de tipo árbol para buscar los bloques. (Se usan Arboles-B) (Están hechos en forma eficiente para almacenar en disco) Los bloques de datos (un puntero a estos) esta en las hojas de los arboles. Se aplican index locks para bloquear los recursos (bloquean nodos de un índice.) Bloqueo al padre, bloqueo al hijo, puedo desbloquear al padre. Cada nodo subsiguiente se puede bloquear si tengo el del padre. Un nodo deslockeado no puede volver a lockearse. Protocolo del cangrejo. Bloqueamos la raiz y vamos adquiriendo locks con los hijos hasta llegar a lo que queremos, liberando el padre a menos que sepamos que se puede partir el nodo hijo.
+\end{itemize}
+
+
+
+\subsubsection*{Timestamps}
+\begin{itemize}
+\item A cada transacción se le asigna una marca de tiempo que se lo asigna el gestor cuando inicia la transacción.
+\item Los timestamps deben de ser únicos y determinaran el orden serial respecto al cual el solapamiento deberá ser equivalente.
+\item Se permite la ocurrencia de conflictos pero siempre que las transacciones aparezcan en el orden serial equivalente.
+\item No tiene deadlocks (no usa locks)
+\item Para cada item X se debe de mantener:
+    \begin{itemize}
+    \item read\_TS(X): Es el TS(T) correspondiente a la transacción mas joven que leyo el item X. (mayor TS(T))
+    \item write\_TS(X): Es el TS(T) correspondiente a la transacción mas joven que escribio el item X. (mayor TS(T))
+    \end{itemize}
+\item La desventaja es que impone un orden 'caprichosos' porque una transacción recibió un timestamp menor a otra nos obliga el orden serial equivalente.
+\end{itemize}
+
+Reglas:
+\begin{itemize}
+\item Cuando una transacción Ti quiere ejecutar R(X), si una transacción posterior Tj modifico el item, Ti deberá ser abortada. De lo contrario se actualiza el valor de read\_TS(X) y lee.
+\item Cuando una transacción Ti quiere ejecutar W(X), si una transacción posterior Tj leyó o escribió el item, Ti deberá ser abortada (write too late). De lo contrario se actualiza el valor de write\_TS(X) y escribe.
+\end{itemize}
+
+
+
+\subsubsection*{Regla de escritura de Thomas}
+\begin{itemize}
+\item Si cuando Ti intenta escribir un item que una transacción posterior Tj ya lo escribió entonces Ti puede descartar su actualización sin riesgos siempre y cuando el item no haya sido leído por ninguna transacción posterior Ti.
+\item Si yo soy anterior a una transacción que ya escribió y yo quiero escribirlo entonces si entre los dos timestamps nadie la leyó entonces puedo evitar esa actualización y no tengo que abortar esa transacción.
+\end{itemize}
+
+
+\subsubsection*{Control de concurrencia multiversion}
+Snapshot Isolation es una de las implementaciones posibles. El objetivo es que cada transacción vea una imagen (una 'foto') de la base de datos correspondiente al instante de inicio, Que sea una foto quiere decir todo lo que estaba commiteado solo. Me deshago de la snapshot cuando termina la ultima transacción que la estaba usando.
+
+\medskip
+Cuando dos transacciones intentan modificar el mismo item gana la que commitea primero, la otra se aborta. (first-committer-wins). Por sí solo no alcanza para garantizar la serializabilidad, para eso se debe validar permanentemente con el grafo de precedencias buscando ciclos de conflictos RW y usar Locks de predicados en el proceso de detección de conflictos, para evitar la anomalía del fantasma.
+
+\medskip
+Write Skew
+No se evita en snapshot isolation.
+
+\medskip
+Para evitarlo podemos usar locks de tablas o locks de predicados (mas eficiente) (Bloquea las tuplas que podrían cumplir la condición, para eso se aprovecha la estructura de árbol y el índice que se usa). Se llaman estructuras índice, (CREATE INDEX) ayudan a evitar tener que recorrer toda la tabla. (Los creamos si nos sirve para determinado atributo)
+
+\medskip
+Si tengo estas estructuras las puedo aprovechar para evitar el lock de fantasma. Bloqueamos el nodo del árbol y los bloques, por lo que nadie puede insertar o modificar lo que nos interesa. (Range lock)
+
+
+\subsection*{Recuperabilidad}
+
+\begin{itemize}
+\item La serializabilidad de las transacciones ya nos asegura la propiedad de aislamiento.
+\item Queremos que una vez que una transacción commiteo, no se deba deshacer. Ayuda a implementar durabilidad.
+\item \textbf{Definición}: un solapamiento es recuperable si y solo si ninguna transacción T realiza el commit hasta tanto todas las transacciones que escribieron datos antes de que T los leyera hayan commiteado. (Nunca pasa que alguien commitea cuando quienes le dieron datos todavía no commitearon)
+\item Hay que mirar las lecturas, si alguien lee algo que otro modifico.
+\item Un SGBD no debería jamás permitir la ejecución de un solapamiento que no sea recuperable.
+\item Si un solapamiento de transacciones es recuperable, entonces nunca será necesario deshacer transacciones que ya hayan commiteado. Aún así puede ser necesario deshacer transacciones que no aún no han commiteado. (puede que produzca rollbacks)
+\item Para evitar los rollbacks en cascada es necesario que una transacción no lea valores que aún no fueron commiteados. Esto es más fuerte que la condición de recuperabilidad y evita la lectura sucia. (No leo algo a menos que este commiteado)
+\item Los locks pueden ayudar. Protocolo de lock de dos fases estricto (S2PL) y Protocolo de lock de dos fases riguroso (R2PL). Garantizan que todo solapamiento sea serializable, recuperable y no produzca rollbacks en cascada.
+\end{itemize}
+
+\newpage

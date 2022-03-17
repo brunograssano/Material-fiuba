@@ -1,0 +1,81 @@
+\section{Data warehousing}
+
+Se tienen datos estaticos y dinamicos en las empresas, el volumen de datos se relaciona con el tamaño de la organizacion. Debe de ser previsto para dimensionar la base de datos correctamente. Esta capacidad se conoce capacidad transaccional. (Dar a basto para procesar los datos)
+
+
+\subsection*{OLTP}
+\begin{itemize}
+\item On-line transaction processing
+\item Datos que se generan dinámicamente
+\item Capacidad transaccional es la capacidad para procesar el volumen de datos
+\end{itemize}
+
+
+\subsubsection*{Arquitectura de 3 capas}
+\begin{itemize}
+\item Presentación, la interfaz en la que el usuario carga sus datos.
+\item Lógica, es la capa intermedia, hace de servidor. Recibe la consulta y la ejecuta.
+\item Capa de datos, los nodos de almacenamiento.
+\end{itemize}
+
+
+\subsection*{Olap}
+\begin{itemize}
+\item On-line analitical processing
+\item Se empezó a hacer relevante extraer datos de información ya almacenada.
+\item Se tiene registro de los datos y la capacidad de procesarlos, surgió la idea de aprovecharlos para tomar decisiones.
+\item Para esto hace falta reducir la cantidad de datos y poder expresar consultas mas complejas
+\item Codd propone 12 reglas, se muestran 6:
+    \begin{itemize}
+    \item Vista conceptual multidimensional, mantener los datos en una matriz, cada dimension representa un atributo.
+    \item Manipulación intuitiva de datos, se debe de poder diseñar la vista conceptual con una interfaz amigable.
+    \item Accesibilidad, combinar datos que vienen de distintos lugares (mediarlos)
+    \item Extracción batch e interpretativa, se debe de poder almacenar el resultado del procesamiento batch. Debe de poder mostrarse también.
+    \item Modelos de análisis, poder responder consultas de tipo estadístico o predicativo.
+    \item Arquitectura cliente-servidor, debo de poder conectarme y ver el data warehouse
+    \end{itemize}
+\end{itemize}
+
+
+Las aplicaciones OLAP generalmente se ejecutan con una copia paralela de la base de datos que se conoce como data warehouse (integran datos provenientes de fuentes de datos heterogéneas).
+
+
+
+\subsection*{Modelado conceptual}
+\begin{itemize}
+\item Nuestro objetivo es definir una serie de medidas numéricas sobre un conjunto de atributos a los que denominaremos dimensiones
+\item Debemos definir cuales serán las dimensiones del data warehouse
+\item A la medida numérica asociada a un valor concreto de cada una de las dimensiones la llamamos hecho.
+\item El diagrama de estrella permite comunicar la estructura de hechos y dimensiones de un data warehouse.
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/EjemploDiagramaEstrella.PNG}
+    \caption{Ejemplo diagrama estrella}
+\end{figure}
+
+\subsection*{Modelo lógico}
+\begin{itemize}
+\item La tabla de hechos guardará información sumarizada, de acuerdo a las dimensiones que nos interesará explorar.
+\item La forma de almacenamiento depende de las implementaciones. Ej MOLAP, ROLAP, HOLAP
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/EjemploMOLAP.PNG}
+    \caption{Ejemplo MOLAP}
+\end{figure}
+
+
+\subsection*{Operaciones}
+\begin{itemize}
+\item Operación roll-up consiste en agregar los datos de una dimensión subiendo un nivel en su jerarquía.  Por ejemplo, si tenemos el total de ventas por ciudad y producto, podríamos hacer un roll-up de la ciudad para obtener un total por provincia y producto.
+\item Operación drill-down es la contraria a roll-up.
+\item La operación de pivoteo consiste en producir una tabla agregada por un subconjunto del conjunto de dimensiones en cierto orden deseado.
+\item La operación de slicing y dicing permiten realizar una selección en una dimensión o mas.
+\end{itemize}
+
+
+
+\newpage

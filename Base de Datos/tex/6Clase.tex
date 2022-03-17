@@ -1,0 +1,291 @@
+
+\section{Practica: Álgebra relacional}
+\begin{itemize}
+\item El álgebra relacional es al SQL lo que el latín es a las lenguas romances. Es el fundamento.
+\item Proporciona un fundamento formal para las operaciones del modelo relacional el álgebra relacional.
+\item Dos tipos de operaciones, unarias y binarias.
+\item Unarias:selección, proyección
+\item Binarias: join y variantes, en conjuntos esta la unión, intersección, diferencia y producto cartesiano.
+\item Hay operadores fundamentales y no fundamentales.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/operadores.PNG}
+\end{figure}
+
+\subsection*{Operadores en forma gráfica}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/seleccionGrafico.PNG}
+\end{figure}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/productoCartesianoGrafico.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/divisionGrafica.PNG}
+\end{figure}
+
+\subsection*{División}
+
+\begin{itemize}
+\item Si surge la palabra \emph{todos/todas} quiero relacionar dos conjuntos, surge la división.
+\item Es importante identificar de donde obtengo la información y no proyectar de menos/mas.
+\end{itemize}
+
+\medskip
+\textbf{Forma general de la división}
+
+\begin{center}
+    $S \ \% \ T =  \pi_{A1 \ldots A_{n}}(S) - \pi_{A1 \ldots A_{n}}(\pi_{A1 \ldots A_{n}}(S)\ \times\ T\ -\ S \ )$
+\end{center}
+
+
+
+\begin{itemize}
+\item No puedo dejar otra cosa que no quiero realmente.
+\item La proyección elimina los repetidos, no los muestra.
+\end{itemize}
+
+\newpage
+\subsection*{Taller}
+\href{https://dbis-uibk.github.io/relax/calc/gist/552932a29392f8272951e01ada813ae1}{Link para probarlo}
+
+
+\begin{itemize}
+\item Listar las películas del año 2000.
+\end{itemize}
+
+$\sigma$ year=2000 (movies)
+
+
+\begin{itemize}
+\item Mostrar el nombre y apellido de los directores de la base que tienen películas fechadas en el año 2000
+\end{itemize}
+
+
+peliculas2000 = $\sigma$ year=2000 (movies)
+
+idsPeliculas2000 = $\pi$ id (peliculas2000)
+
+relacionPeliConDirector = (idsPeliculas2000) $\bowtie$ id=movie\_id (movies\_directors)
+
+idsDirectores2000 = $\pi$ director\_id (relacionPeliConDirector)
+
+directores2000 = (idsDirectores2000) $\bowtie$ director\_id=id (directors)
+
+nombreApellidoDirectores2000 = $\pi$ first\_name,last\_name (directores2000)
+
+nombreApellidoDirectores2000
+
+
+
+\begin{itemize}
+\item Mostrar los nombres de las películas filmadas por Woody Allen
+\end{itemize}
+
+woodyAllen = $\sigma$ first\_name='Woody' and last\_name='Allen' (directors)
+
+idWoodyAllen = $\pi$ id woodyAllen
+
+relacionDirectorPeliculas = idWoodyAllen $\bowtie$ id = director\_id (movies\_directors)
+
+idsPeliculasWoodyAllen = $\pi$ movie\_id (relacionDirectorPeliculas)
+
+peliculasWoodyAllen = (idsPeliculasWoodyAllen) $\bowtie$ movie\_id=id (movies)
+
+nombrePeliculasWoodyAllen = $\pi$ name (peliculasWoodyAllen)
+
+nombrePeliculasWoodyAllen
+
+
+
+\begin{itemize}
+\item Mostrar los nombres de las películas en que Hitler figura como actor
+\end{itemize}
+
+actorHitler = $\sigma$ last\_name='Hitler' (actors)
+
+idActorHitler = $\pi$ id (actorHitler)
+
+relacionActorRolesPeliculas = (idActorHitler) $\bowtie$ id=actor\_id (roles)
+
+idPeliculaActorHitler = $\pi$ movie\_id (relacionActorRolesPeliculas)
+
+peliculasActorHitler = (idPeliculaActorHitler) $\bowtie$ movie\_id=id (movies)
+
+nombrePeliculasConHitler = $\pi$ name (peliculasActorHitler)
+
+nombrePeliculasConHitler
+
+
+\begin{itemize}
+\item Otra opción renombrando (hace un natural join)
+\end{itemize}
+
+ID\_HITLER = $\pi$ id ($\sigma$ last\_name = 'Hitler' actors)
+
+ID\_MOVIES = $\rho$ id $\leftarrow$ movie\_id ($\pi$ movie\_id (roles $\bowtie$ ($\rho$ actor\_id$\leftarrow$id ID\_HITLER)))
+
+$\pi$ name (movies $\bowtie$ ID\_MOVIES)
+
+
+\begin{itemize}
+\item ¿Algún director abarca todo los géneros?
+\end{itemize}
+
+
+directoresConGeneros = $\pi$ director\_id,genre (directors\_genres)
+
+generosPosibles = $\pi$ genre (movies\_genres)
+
+directoresenTodosLosGeneros = directoresConGeneros $\div$ generosPosibles
+
+directoresenTodosLosGeneros
+
+
+\begin{itemize}
+\item Mostrar el nombre y apellido de los directores que abarcaron (al menos) los mismos géneros que Polanski. ¿Y que Scorsese? ¿Y que Tarantino?
+\end{itemize}
+
+
+directorPolansky = $\sigma$ last\_name='Polanski' (directors)
+
+idDirectorPolansky = $\pi$ id (directorPolansky)
+
+relacionGenerosPolansky = (idDirectorPolansky) $\bowtie$ id=director\_id (directors\_genres)
+
+generosPolansky = $\pi$ genre (relacionGenerosPolansky)
+
+directoresConGeneros = $\pi$ director\_id,genre (directors\_genres)
+
+idDirectoresConMismosGeneros = (directoresConGeneros) $\div$ (generosPolansky)
+
+directoresConMismosGeneros = (idDirectoresConMismosGeneros) $\bowtie$ director\_id=id (directors)
+
+nombresApellidosdirectores = $\pi$ first\_name,last\_name (directoresConMismosGeneros)
+
+$\sigma$ last\_name$\ne$'Polanski' (nombresApellidosdirectores)
+
+
+\begin{itemize}
+\item Mostrar el año de la ultima película.
+\end{itemize}
+
+aniosPeliculas = $\pi$ year (movies)
+
+aniosPeliculas2 = $\rho$ year2$\leftarrow$movies.year aniosPeliculas
+
+aniosDoble = aniosPeliculas $\times$ aniosPeliculas2
+
+aniosMenores = $\sigma$ year < year2 (aniosDoble)
+
+ultimoAnio = $\pi$ year aniosDoble - $\pi$ year aniosMenores
+
+ultimoAnio
+
+
+
+\begin{itemize}
+\item Listar las películas del ultimo año.
+\end{itemize}
+
+aniosPeliculas = $\pi$ year (movies)
+
+aniosPeliculas2 = $\rho$ year2$\leftarrow$movies.year aniosPeliculas
+
+aniosDoble = aniosPeliculas $\times$ aniosPeliculas2
+
+aniosMenores = $\sigma$ year < year2 (aniosDoble)
+
+ultimoAnio = $\pi$ year aniosDoble - $\pi$ year aniosMenores
+
+peliculasUltimoAnio = ultimoAnio $\bowtie$ movies
+
+peliculasUltimoAnio
+
+\begin{itemize}
+\item Listar las películas del director Hitchcock en las que actuó Carroll.
+\end{itemize}
+
+
+directorHitchcock = $\sigma$ last\_name='Hitchcock' (directors)
+
+idDirectorHitchcock = $\pi$ id (directorHitchcock)
+
+relacionPeliculasDirector = (idDirectorHitchcock) $\bowtie$ id=director\_id (movies\_directors)
+
+idPeliculasHitchcock = $\pi$ movie\_id (relacionPeliculasDirector)
+
+actoresEnPeliculasDeHitchcock = roles $\bowtie$ idPeliculasHitchcock
+
+actorCarroll = $\sigma$ first\_name = 'Leo G.' and last\_name='Carroll' (actors)
+
+idActorCarroll = $\pi$ id (actorCarroll)
+
+rolesDeCarrollEnPeliculasDeHitcock = actoresEnPeliculasDeHitchcock $\bowtie$ roles.actor\_id=actors.id idActorCarroll
+
+idPeliculasBuscadas = $\pi$ movie\_id rolesDeCarrollEnPeliculasDeHitcock
+
+peliculasBuscadas = movies $\bowtie$ id=movie\_id idPeliculasBuscadas
+
+peliculasBuscadas
+
+
+
+\begin{itemize}
+\item Listar las películas del director Hitchcock en las que NO actuó Carroll.
+\end{itemize}
+
+directorHitchcock = $\sigma$ last\_name='Hitchcock' (directors)
+
+idDirectorHitchcock = $\pi$ id (directorHitchcock)
+
+relacionPeliculasDirector = (idDirectorHitchcock) $\bowtie$ id=director\_id (movies\_directors)
+
+idPeliculasHitchcock = $\pi$ movie\_id (relacionPeliculasDirector)
+
+actoresEnPeliculasDeHitchcock = roles $\bowtie$ idPeliculasHitchcock
+
+idsActoresEnPeliculasDeHitchcock = $\pi$ actor\_id,movie\_id  actoresEnPeliculasDeHitchcock
+
+actorCarroll = $\sigma$ first\_name = 'Leo G.' and last\_name='Carroll' (actors)
+
+idActorCarroll = $\pi$ id (actorCarroll)
+
+rolesDeCarrollEnPeliculasDeHitcock = actoresEnPeliculasDeHitchcock $\bowtie$ roles.actor\_id=actors.id idActorCarroll
+
+idsRolesDeCarrollEnPeliculasDeHitcock = $\pi$ actor\_id,movie\_id rolesDeCarrollEnPeliculasDeHitcock
+
+peliculasSinCarrol = idsActoresEnPeliculasDeHitchcock - idsRolesDeCarrollEnPeliculasDeHitcock
+
+idPeliculasBuscadas = $\pi$ movie\_id peliculasSinCarrol
+
+peliculasBuscadas = movies $\bowtie$ id=movie\_id idPeliculasBuscadas
+
+peliculasBuscadas
+
+
+
+\begin{itemize}
+\item Listar los actores que participan de al menos 3 películas.
+\end{itemize}
+La única forma de contar es realizando productos cartesianos.
+
+
+PRIMER\_PROD = $\pi$ r.actor\_id, r.movie\_id, ro.movie\_id ($\rho$ r (roles) $\bowtie$ r.actor\_id = ro.actor\_id and r.movie\_id $\ne$ ro.movie\_id $\rho$ ro (roles))
+
+SEGUNDO\_PROD = PRIMER\_PROD $\bowtie$ r.actor\_id =  roles.actor\_id and r.movie\_id $\ne$ roles.movie\_id and ro.movie\_id $\ne$ roles.movie\_id roles
+
+IDS\_ACTORES = $\rho$ id$\leftarrow$r.actor\_id ($\pi$ r.actor\_id (SEGUNDO\_PROD))
+
+actors $\bowtie$ IDS\_ACTORES 
+
+\newpage

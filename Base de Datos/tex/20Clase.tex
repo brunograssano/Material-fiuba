@@ -1,0 +1,210 @@
+\section{Recuperabilidad}
+
+\begin{itemize}
+\item En la vida real se pueden producir diferentes tipos de fallas.
+\item Fallas del sistema por errores de software o hardware que detienen la ejecución de un programa.Ej fallas de segmentación, división por cero, fallas de memoria.
+\item Fallas de aplicación, provienen desde la aplicación que utiliza la base de datos. Cancelación o vuelta atras de una transacción
+\item Fallas de dispositivos, provienen de un daño físico
+\item Fallas naturales externas que provienen afuera del hardware. Caídas de tensión, terremotos, incendios
+\end{itemize}
+
+Supongamos que se produce una falla no catastrófica en el momento en que se están ejecutando muchas transacciones. La base de datos debe ser llevada al estado inmediato anterior al comienzo de la transacción. Para esto se utiliza el log que se fue armando.
+
+\subsection*{El log}
+El gestor de recuperación de la SGBD almacena generalmente los siguientes registros:
+
+\begin{itemize}
+\item BEGIN T
+\item WRITE T, X, xold, xnew
+\item READ T, X
+\item COMMIT T
+\item ABORT T
+\end{itemize}
+
+Siendo T una transaccion, X un item, xold el valor viejo, xnew el valor nuevo.
+
+\medskip
+El gestor se guia principalmente por dos reglas:
+
+\begin{itemize}
+\item WAL: Write Ahead Log, antes de escribir un item a disco, se escribe el log a disco.
+\item FLC: Force Log Commit, antes de realizar un commit se escribe el log a disco
+\end{itemize}
+
+\subsection*{Técnicas}
+
+\begin{itemize}
+\item Actualización inmediata: Los datos se guardan en disco lo antes posible, necesariamente antes del commit de la transacción.
+\item Actualización diferida: Los datos se guardan en disco después del commit de la transacción.
+\end{itemize}
+
+\newpage
+\subsection*{Algoritmos de recuperación}
+Asumen que los solapamientos son recuperables y evitan ROLLBACKS en cascada. Si no se cumple esto hay que realizar pasos adicionales.
+
+\subsubsection*{UNDO (Actualización inmediata)}
+Todo valor $V_{old}$ asignado por una transacción que ya commiteo debe ser guardado en el log en disco antes de que su modificación por parte de otra transacción sea guardada en disco (flushed).
+
+\medskip
+Los pasos del algoritmo son:
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosUndo.PNG}
+\end{figure}
+
+\begin{itemize}
+\item Cuando hay un reinicio, miro el log y veo si hay transacciones no commiteadas. Si encuentro alguna la tengo que deshacer. (Se considera que la transacción commiteo cuando el registro en el log queda en disco)
+\item El gestor se tiene que asegurar que antes del commit el dato en memoria vaya a disco.
+\end{itemize}
+
+\medskip
+En el reinicio los pasos son:
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosUndoReinicio.PNG}
+\end{figure}
+
+
+Si vuelve a fallar se ejecuta devuelta, no cambia el resultado.
+
+
+\newpage
+\subsubsection*{REDO (Actualización diferida)}
+Antes de realizar el commit todo nuevo valor $v$ asignado por la transacción debe ser salvaguardado en el log en disco.. (Me obliga solo a guardar el log primero, no el dato.) (Se postergan los accesos a disco, las fallas no deberian de ser algo comun)
+
+\medskip
+Pasos:
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosRedo.PNG}
+    \caption{Se usa el valor nuevo, no el viejo!}
+\end{figure}
+
+
+\medskip
+Cuando el sistema se reinicia se siguen los siguientes pasos.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosRedoReinicio.PNG}
+    \caption{Se recorre de lo mas viejo a lo mas nuevo. Nos tiene que quedar lo mas nuevo en disco}
+\end{figure}
+
+\begin{itemize}
+\item Si la transacción falla antes del commit, no se deshace nada (solo se abortan las transacciones encontradas). Si falla después de haber escrito el COMMIT en disco, hay que rehacer toda la transacción (no sabemo si estan los valores nuevos en disco).
+\item En el algoritmo REDO, una transacción puede commitear sin haber guardado en disco todos sus ítems modificados.
+\item Ante una falla previa posterior al commit, entonces, será necesario reescribir (REDO) todos los valores que la transacción había asignado a los ítems (Implica recorrer todo el log de atrás para adelante aplicando cada uno de los WRITE.)
+\item Si no hay checkpoints hay que revisar todo el archivo, puede haber quedado una transaccion desde el comienzo sin terminar.
+\end{itemize}
+
+
+\newpage
+\subsubsection*{UNDO/REDO}
+
+Los pasos:
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosUndoRedo.PNG}
+    \caption{Escribimos ambos valores, el viejo y el nuevo. Después de eso podemos mandar el valor de X a disco cuando queramos (antes o después del commit, tenemos ambos datos).}
+\end{figure}
+
+En el reinicio:
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/PasosUndoRedoReinicio.PNG}
+    \caption{Deshago lo que no tiene commit, rehago lo que tiene commit}
+\end{figure}
+
+\begin{itemize}
+    \item Undo o Redo me obligan a trabajar a nivel de item, no de bloque/fila.
+    \item Es mucho mas flexible que los otros dos.
+    \item El log se vuelve mas grande, el doble
+    \item Me puedo despreocupar del uso del buffer del disco con este metodo
+\end{itemize}
+
+\newpage
+\subsection*{Puntos de control}
+
+\begin{itemize}
+\item Al reiniciar el sistema no sabemos hasta donde hay que retroceder en el archivo de log. Para esto, se utilizan checkpoints. (Indica que todo hasta ese punto ha sido almacenado en disco)
+\item Hay checkpoints inactivos y activos.
+\item Los inactivos implican que no se toman mas transacciones mientras que se esta ejecutando el copiado a disco. Se usa el registro CKPT
+\item Los activos toman transacciones usando dos registros para el checkpoint, BEGIN CKPT y END CKPT
+\end{itemize}
+
+
+\subsubsection*{Undo}
+
+\textbf{Inactivo}
+
+\begin{enumerate}
+\item Cuando se quiere hacer, se dejan de aceptar nuevas transacciones
+\item Espera a que terminen todas las transacciones comenzadas, hagan su commit
+\item Escribe CKPT en el log y lo vuelca a disco
+\end{enumerate}
+
+Si el sistema se cae después del CKPT los items ya están guardados, durante la recuperación solo debemos deshacer las transacciones que no hayan hecho commit hasta encontrar el CKPT. Se podría borrar todo lo que esta atrás del CKPT en el log.
+
+\bigskip
+
+\textbf{Activo}
+
+\begin{enumerate}
+\item Escribimos un registro (BEGIN CKPT tactivas) con el listado de todas las transacciones  activas hasta el momento. (Seguimos recibiendo transacciones)
+\item Esperamos a que todas esas transacciones activas hagan su COMMIT
+\item Una vez que hicieron su commit, terminamos el checkpoint. No nos importa si aparecieron mas transacciones en el medio (END CKPT)
+\end{enumerate}
+
+Si ocurre un problema y queremos hacer un rollback:
+\begin{itemize}
+\item Si encontramos un END CKPT, retrocedemos hasta el BEGIN CKPT. Ninguna transaccion incompleta puede haber comenzado antes.
+\item Si encontramos un BEGIN CKPT solamente podemos deshacer las que están en la lista o que no terminaron. 
+\end{itemize}
+
+
+\subsubsection*{REDO}
+
+\textbf{Activo}
+
+\begin{enumerate}
+\item Escribimos un registro BEGIN CKPT con el listado de todas las transacciones activas hasta el momento
+\item Hacer el volcado a disco de todos los ítems que hayan sido modificados por transacciones que ya commitearon. (las que ya habian terminado)
+\item Escribir (END CKPT) en el log y volcarlo a disco.
+\end{enumerate}
+
+Si ocurre un problema y queremos hacer un rollback:
+\begin{itemize}
+\item Que encontremos primero un registro (END CKPT).En ese caso,
+deberemos retroceder hasta el (BEGIN , Tx ) más antiguo del
+listado que figure en el (BEGIN CKPT) para rehacer todas las
+transacciones que commitearon. Escribir (ABORT, Ty ) para
+aquellas que no hayan commiteado.
+
+\item Que encontremos primero un registro (BEGIN CKPT).Si el
+checkpoint llego sólo hasta este punto no nos sirve, y entonces
+deberemos ir a buscar un checkpoint anterior en el log
+\end{itemize}
+
+
+\subsubsection*{UNDO/REDO}
+
+\textbf{Activo}
+
+\begin{enumerate}
+\item Escribimos un registro con el listado de todas las transacciones activas hasta el momento
+\item Volcamos a disco todos \textbf{los items} modificados antes del BEGIN CKPT
+\item Escribimos END CKPT y lo llevamos al disco.
+\end{enumerate}
+
+En la recuperación es posible que debamos retroceder hasta el
+inicio de la transacción más antigua en el listado de
+transacciones, para deshacerla en caso de que no haya
+commiteado.
+
+Puedo rehacer cosas que estén después del BEGIN CKPT si se llego al END. Lo de antes de llevo a disco. 
+
+
+
+
+\newpage

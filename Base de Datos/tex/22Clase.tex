@@ -1,0 +1,223 @@
+\section{Practica: Neo4J}
+
+\begin{itemize}
+\item Orientada a grafos
+\item Forma distinta de modelar.
+\item Aplica a una gran cantidad de problemas, relaciones, distancias
+\item Se tienen 2 elementos, nodos y arcos
+\item Las ventajas son
+    \begin{itemize}
+    \item Que se pueden ver patrones de nodos conectados entre si
+    \item Encontrar caminos entre nodos
+    \item La ruta mas corta
+    \item Medidas asociadas al grafo (centralidad,proximidad,periferia)
+    \end{itemize}
+\end{itemize}
+
+
+
+\subsection*{Arcos}
+\begin{itemize}
+\item Tienen un único tipo
+\item Pueden tener propiedades
+\item Tienen una dirección si o si
+\item Vinculan 2 nodos o con si mismo
+\end{itemize}
+
+
+\subsection*{Consultas}
+
+\begin{verbatim}
+MATCH patron
+[WHERE filtros]
+RETURN respuestas
+[ORDER BY expresiones]
+[SKIP cant LIMIT cant]  
+\end{verbatim}
+
+
+\begin{itemize}
+\item patrón:estructura que quiero
+\item filtros, como sql
+\end{itemize}
+
+
+\subsection*{Patrón de nodos}
+\begin{itemize}
+\item (alias:etiqueta:{filtros})
+\item Es case-sensitive
+\item Manejo de labels: No tengo que definir esquemas
+\end{itemize}
+
+
+\subsection*{Taller}
+\subsubsection*{1 Muestre en orden alfabetico, las 10 primeras pelıculas del genero (genre) Science Fiction}
+ 
+\begin{verbatim}
+MATCH (n:Movie)
+WHERE n.genre = "Science Fiction"
+RETURN n
+ORDER BY n.title
+LIMIT 10
+\end{verbatim}
+
+\subsubsection*{2 Muestre 20 peliculas del genero “Drama” y cuyo estudio contenga la palabra “Pictures”, devolviendo el titulo de la pelicula y el nombre del estudio}
+
+\begin{verbatim}
+MATCH (n:Movie)
+WHERE n.genre = "Drama" AND n.studio=~".*Pictures.*"
+RETURN n.title, n.studio
+LIMIT 20
+\end{verbatim}
+
+Otra opción es con n.studio CONTAINS "Picture"
+
+\subsubsection*{3 Muestre el nombre y fecha de nacimiento de 20 personas que sean actores Y directores, y que tengan fecha de nacimiento registrada}
+
+\begin{verbatim}
+MATCH (n:Actor:Director)
+WHERE n.birthdate IS NOT NULL
+RETURN n.name, n.birthdate
+LIMIT 20
+\end{verbatim}
+
+\subsubsection*{4 Muestre el grafo de las películas filmadas por Oliver Stone}
+
+\begin{verbatim}
+MATCH (os:Director{name: 'Oliver Stone'})-[d:DIRECTED]-(pelis:Movie)
+RETURN os, pelis LIMIT 20
+\end{verbatim}
+
+\begin{verbatim}
+MATCH (p:Director{name=”Oliver Stone”}) - [d:DIRECTED] -> (m:Movie)
+RETURN p,d,m
+\end{verbatim}
+
+\subsubsection*{5 Muestre el grafo de todos los co-actores de Tom Hanks}
+
+\begin{verbatim}
+MATCH (th:Actor{name=”Tom Hanks”}) -[a: ACTS_IN]-> (m: Movie),
+	  (m) <- [a2: ACTS_IN]- (ca:Actor)
+RETURN  th, a, a2, ca
+\end{verbatim}
+
+
+\subsubsection*{6 Muestre 10 actores que están a distancia 4 de Kevin Bacon}
+
+\begin{verbatim}
+MATCH (n:Actor)-[*4]-(kb:Actor{name:'Kevin Bacon'})
+RETURN n
+LIMIT 10
+\end{verbatim}
+
+\subsection*{Alias de subgrafos}
+
+\begin{itemize}
+\item Para usar funciones sobre los subgrafos
+    \begin{itemize}
+    \item Length
+    \item Relationships
+    \item Nodes
+    \end{itemize}
+\item Se pueden usar como booleanos
+\item Se pueden poner varios subgrafos en el MATCH
+\item Se pueden tener OPTIONAL MATCH que es similar a un outer join
+\item Caminos mas cortos, son funciones que reciben un subgrafo: shortestPath, allShortestPaths
+\end{itemize}
+
+
+\subsubsection*{7 Muestre las películas que Clint Eastwood dirigió y en las que no actuó}
+
+\begin{verbatim}
+MATCH (d:Actor:Director{name:'Clint Eastwood'})-[:DIRECTED]->(m:Movie)
+WHERE NOT (d)-[:ACTS_IN]->(m) 
+RETURN d,m
+\end{verbatim}
+
+
+
+\subsubsection*{8 Muestre un camino más corto de Meg Ryan a Kevin Bacon.}
+
+\begin{verbatim}
+MATCH r = shortestPath( (n{name:'Meg Ryan'})-[*]-(m{name:'Kevin Bacon'})  )
+RETURN r
+\end{verbatim}
+
+\subsubsection*{9 Muestre los actores que trabajaron en la trilogía completa de The Matrix ("The Matrix", "The Matrix Reloaded" y "The Matrix Revolutions")}
+
+\begin{verbatim}
+MATCH (a:Actor)-[:ACTS_IN]-(m:Movie{title:'The Matrix'}),
+      (a)-[:ACTS_IN]-(m2:Movie{title:'The Matrix Reloaded'}),
+      (a)-[:ACTS_IN]-(m3:Movie{title:'The Matrix Revolutions'})
+RETURN a
+\end{verbatim}
+
+Otra opción
+
+\begin{verbatim}
+MATCH (a:Actor)-[:ACTS_IN]-(m:Movie{title:"The Matrix"})
+WHERE (:Movie{title:"The Matrix Revolutions"})<-[:ACTS_IN]-(a)-[:ACTS_IN]->(:Movie{title:"The Matrix Reloaded"})
+RETURN a
+\end{verbatim}
+
+\subsection*{Funciones de agregación}
+\begin{itemize}
+\item Ya incluirlas en el RETURN nos devuelve lo que pedimos
+\item Si devuelvo algo sin una función de agregación, se agrupa por esta propiedad.
+\item WITH reemplaza al return (Seria como el HAVING en sql)
+\item Permite manipular resultados antes de pasar a la siguiente parte de la consulta
+\item Se puede usar para filtrar agregación
+\item Con WITH tengo que definir alias a lo que voy a estar trabajando con AS.
+\end{itemize}
+
+
+
+\subsubsection*{10 Obtenga el nombre de los 10 directores que han trabajado con más actores (y la cantidad de actores)}
+
+\begin{verbatim}
+MATCH (d:Director)-[:DIRECTED]-(m:Movie), (a:Actor)-[:ACTS_IN]-(m)
+RETURN d.name, COUNT(DISTINCT a) AS cantidad
+ORDER BY cantidad DESC
+LIMIT 10
+\end{verbatim}
+
+
+\subsubsection*{11 ¿Quien/es es/son el/los actor/es más joven/es de la base de datos?}
+\begin{verbatim}
+MATCH (a:Actor) 
+WITH MAX(a.birthday) AS mas_joven
+MATCH (j:Actor) 
+WHERE j.birthday=mas_joven
+RETURN j
+\end{verbatim}
+
+\subsubsection*{12 Devuelva el nombre de personas que hayan actuado en al menos 10 películas y hayan dirigido al menos 5}
+
+\begin{verbatim}
+MATCH (person:Person)-[acts:ACTS_IN]->(:Movie)
+WITH COUNT(acts) as cant_actuaciones, person
+MATCH (person:Person)-[directs:DIRECTED]->(:Movie)
+WITH COUNT(directs) as cant_direcciones, cant_actuaciones, person
+WHERE cant_direcciones >= 5 AND cant_actuaciones >= 10
+RETURN person.name, cant_direcciones, cant_actuaciones
+\end{verbatim}
+
+
+\subsubsection*{13 ¿A qué distancia se encuentra el actor más viejo de Kevin Bacon?}
+\begin{verbatim}
+MATCH (a:Actor) WITH MIN(a.birthday) AS mas_viejo
+MATCH (j:Actor) WHERE j.birthday=mas_viejo
+MATH g=shortestPath((j)-[*]-(k:Actor{name:'Kevin Bacon'})
+RETURN length( g )
+\end{verbatim}
+
+
+\subsection*{ABM}
+\begin{itemize}
+\item No es lo mismo crear nodos que arcos
+\item Para nodos es CREATE y el patron del nodo
+\item Para arcos es con MATCH para vincular los nodos y un CREATE para crear el arco, por cada arco
+\end{itemize}
+
+
+\newpage

@@ -1,0 +1,162 @@
+\section{Procesamiento y Optimización de consultas}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ProcesamientoSQL.PNG}
+    \caption{Representación ideal}
+\end{figure}
+
+\begin{itemize}
+\item Parser y traductor: la parsea a la consulta, se fija que sea sintácticamente correcta y compile, la traduce a una expresión de álgebra relacional
+\item El optimizador analiza la expresión para llegar a un plan de ejecución: Determina con que métodos de acceso y algoritmos ejecuta lo determinado. Utiliza estadísticas para analizar esto.
+\item Después queda solo evaluar para obtener el resultado de la consulta.
+\end{itemize}
+
+
+
+\subsection*{Información de catalogo}
+Es utilizada para estimar costos y optimizar las consultas.
+
+\begin{itemize}
+\item n(R): Cantidad de filas que tiene una relación R.
+\item B(R): Cantidad de bloques en disco que ocupa la tabla R
+\item V(A,R): Cuantos valores distintos toma el atributo A en la relación R. La variabilidad no la mantiene siempre actualizada, n y B si.
+\item F(R): Cantidad de tuplas de R que entran en un bloque (factor de bloque) F(R) = n / B . (Esta también  1/F(R) : Que fracción de un bloque ocupa una tupla.)
+\end{itemize}
+
+El SGBD corre un proceso que realiza un análisis de estas estadísticas. También almacena información de los índices. En este caso que altura y que largo tienen.
+
+
+\begin{itemize}
+\item Heigth(I(A,R)): Altura del índice de búsqueda I por el atributo A de la relación R.
+\item Length(I(A,R)): Cantidad de bloques que ocupan las hojas del índice I.
+\end{itemize}
+
+Mantener actualizadas las estadísticas en cada operación ABM puede ser costoso, por lo que se hacen con cierta periodicidad.
+
+\medskip
+
+
+\begin{itemize}
+\item La expresión se optimiza a través de una heurística y utilizando reglas de equivalencia, obteniendo un plan de consulta.
+\item Cada plan de consulta lógico se materializa para obtener un plan de ejecución en el que se indica el procedimiento físico. Estructuras de datos a usar, índices, algoritmos, etc
+\item Para comparar distintos planes de ejecución necesitamos estimar el costo. Hay varios costos posibles que se pueden tomar, pero el que mas afecta en las bases de datos relacionales centralizadas termina siendo el del acceso a disco.
+\end{itemize}
+
+\subsection*{Índices}
+
+\begin{itemize}
+\item Los índices son estructuras de búsqueda almacenadas y actualizadas por el SGBD que agilizan la búsqueda de registros a partir del valor de un atributo o conjunto de atributos.
+\item Puede implementarse con distintas estructuras de datos. (Arboles, tablas de hash)
+\item Se clasifican en 3 tipos:
+\begin{itemize}
+\item Primarios, el índice es sobre el campo de ordenamiento clave de un archivo ordenado de registros.
+\item De clustering, un índice por atributo no clave que ordena al archivo
+\item Los secundarios, son sobre campos que no son de ordenamiento del archivo.
+\item Solo se puede tener un único índice primario o de clustering.
+\end{itemize}
+\item No se tiene un SQL estándar para la creación de los índices, pero en general es CREATE [UNIQUE] INDEX $nombreIndice$ ON $tabla$
+\end{itemize}
+
+
+\subsection*{Costos}
+\subsubsection*{Selección}
+
+\begin{itemize}
+\item Partimos de una selección básica (condición simple)
+\item Las estrategias que se tienen son:
+\item \textbf{File scan}: se recorre o escanea el archivo buscando aquellos que cumplan la condición. El costo es B(R) (Se recorrieron todos los bloques)
+\item \textbf{Index scan}: usan un índice para la búsqueda.
+\begin{itemize}
+\item Búsqueda con \textbf{índice primario}: solamente una tupla puede satisfacer la condicion, por lo que el costo va a ser (si se usa un arbol) $Height(I(A,R)) + 1$ o (si se usa un hash) $1$
+\item Búsqueda con \textbf{índice de clustering}: Cuando Ai no es clave pero se tiene un índice de ordenamiento por el (clustering). Las tuplas están contiguas en los bloques, los cuales estarán disjuntos. El costo resulta entonces $Height(I(A,R)) + \lceil \frac{n(R)}{V(A_i,R) \cdot F(R)} \rceil = Height(I(A,R)) + \lceil \frac{B(R)}{V(A_i,R)} \rceil $
+\item Búsqueda con \textbf{índice secundario}: cuando Ai no tiene un índice de clustering pero existe un índice secundario asociado a el. El costo es $Height(I(A,R)) + \lceil \frac{n(R)}{V(A_i,R)} \rceil $
+\end{itemize}
+\item Estos cálculos pueden extenderse a otras formas de comparaciones. (Mayor, menor, distinto, etc)
+\item Si la selección involucra la conjunción de varias condiciones simples, pueden adoptarse distintas estrategias.
+\item Si uno de los atributos tiene un índice asociado se aplica primero esta condición y luego se selecciona del resultado aquellas tuplas que cumplen las demás condiciones. (El costo es solo el índice)
+\item Si hay un índice compuesto que tiene a varios atributos se utiliza este índice y se selecciona las que cumplan.
+\item Si hay índices simples para varios atributos se pueden utilizar los índices y después interesar los resultados.
+\item Si la selección tiene una disyunción de condiciones simples se aplican las mismas por separado y luego se unen los resultados. Si no tiene un índice alguna se hace por fuerza bruta.
+\end{itemize}
+
+
+\subsubsection*{Proyección}
+
+\begin{itemize}
+\item X es el atributo de la proyección. ($X'$ para referirnos con los duplicados)
+    \begin{itemize}
+    \item Si X es superclave no hay que eliminar duplicados, por lo que el costo es B(columna)
+    \end{itemize}
+\item Si X no es superclave, hay que eliminar duplicados. Para esto se puede ordenar la tabla o usar una estructura de hash. Eliminar duplicados depende mucho de la memoria
+    \begin{itemize}
+    \item Para ordenar, depende de la cantidad de memoria que tengamos. Si tenemos $B(\pi_{X'}(R)) \leq Mem$ se puede hacer directo en memoria, solo tenemos de costo leerlo todo. Si no nos alcanza la memoria, hay que hacer un ordenamiento externo (en disco) cuyo costo es: $ 2 \cdot B(R) \cdot \lceil log_{Mem-1}(B(R)) \rceil - B(R) $ El logaritmo representa la cantidad de etapas del sort. (Cargamos una cantidad de bloques a memoria, los ordenamos y los guardamos en otro lugar en disco. Cargo los siguientes bloques, ordeno y guardo. Así sucesivamente hasta recorrer todo. Hecho esto se hace una etapa de merge, me fijo cual es el mas chico de todos los primeros de los recorridos y avanzo en esa partición cargando el siguiente. Se hace esto hasta recorrer todo y que nos quede el archivo ordenado. ) La formula cuenta cuantas veces moví cada dato de disco a memoria. (La resta es sin el almacenamiento final en disco, si lo quiero contar se saca)
+    \item Usando un hash, si entra en memoria se puede hacer el hashing en memoria directo. Si no, se usa el hashing externo (en disco), se hacen particiones en disco y se eliminan duplicados ahí. Dos elementos van a la misma partición. El costo es $B(R) + 2 B(\pi_{X'}(R))$ (Aplicamos la función de hash a cada bloque, al resultado cuando se llene el bloque con un valor lo movemos devuelta a disco dependiendo de lo que de. Cuando se termino cargamos a memoria estos bloques y tomamos los valores unicos (deberian de estar en el mismo bloque)) (En memoria tenemos una cantidad de bloques mas uno para traer el bloque de disco y aplicar la función de hash a las filas.)
+    \end{itemize}
+\item Si la consulta SQL no tiene DISTINCT el resultado va a ser siempre B(R)
+\end{itemize}
+
+
+%clase 24
+\subsubsection*{Operaciones de conjuntos}
+
+\begin{itemize}
+\item \textbf{Unión}: Se hace una tabla temporal que tenga los datos ordenados (en memoria o externo) y sin duplicados de cada parte de la unión y después se unen ambas tablas (merge) de datos ordenados. (Algoritmo dado en Algoritmos 1) Vienen ordenados por como lo hace el gestor, no es algo que le dijimos que haga. Como el estándar no obliga la forma de salida, lo da ordenado. El costo es $cost(Ordenar_M(R)) + cost(Ordenar_M(S)) + 2 B(R) + 2 B(S) $
+\item \textbf{Intersección}: La intersección es similar, si hay cosas iguales, avanzo ambas y devuelvo una. Si hay destinos avanzo la menor.
+\item \textbf{Diferencia}: Se devuelven las que están en R pero no en S. Se aplica el algoritmo.
+\end{itemize}
+
+\subsubsection*{Junta}
+Existen distintos métodos para calcularla.
+
+\begin{itemize}
+\item \textbf{Loops anidados}: Lo que hace es probar todos los bloques contra todos los bloques. Carga a memoria 2 bloques (uno de cada lado) y compara todos contra todos. Una vez hecho eso, saca uno (el de la derecha), carga otro y vuelve a comparar. (Así hasta que pase por toda la relación de la derecha). Nos conviene usar como pivote el mas chico. El hecho de comparar todos con todos es lo que hace la junta muy costosa, escala mal. El costo es de $min( B(R) + B(R) B(S), B(S) + B(R) B(S) )$ en el peor caso, en el mejor caso se cargan ambas relaciones a memoria y ese es el único costo. 
+\item \textbf{Único loop}: Vamos a tener un índice para acceder a los datos. Si alguna tabla tiene un índice para el atributo de junta, voy a poder recorrer a través de el. Se agarra la primera fila de S, voy al indice de R y encuentro el puntero al bloque. Junto las filas. Hay que recorrer cada fila de S. Desaparece el termino cuadrático. La junta por índice no mejora porque tenga mas memoria. El costo si el indice es primario es de $ B(S) + n(S) (Height(I(A,R)) + 1) $, si es de clustering $B(S) + n(S) (Height(I(A,R)) + \lceil \frac{B(R)}{V(A_i,R)} \rceil )$, y si es secundario $B(S) + n(S) (Height(I(A,R)) + \lceil \frac{n(R)}{V(A_i,R)} \rceil )$
+\item \textbf{Sort-merge}: Consiste en ordenar los archivos de cada tabla por el/los atributos de junta, si entra en memoria el costo es solo cargarlo, si no, se usa un algoritmo de sort externo. Se ordena R y se vuelve a guardar en disco. El costo es $ B(R) + 2 B(R) \cdot \lceil log_{Mem-1}(B(R)) \rceil + B(S) + 2 B(S) \cdot \lceil log_{Mem-1}(B(S)) \rceil $
+\item \textbf{Método de junta hash}: La idea es particionar las tablas R y S en m grupos uysando una funcion de hash aplicada sobre los atributos de junta X. Si m fue escogido de manera que para cada par de grupos (Ri, Si) al menos uno entre en memoria y sobre un bloque de memoria para hacer desfilar al otro grupo, el costo total es de $3 ( B(R) + B(S) )$
+\end{itemize}
+
+
+\subsubsection*{Pipelining}
+
+Sucede cuando el resultado de un operador puede ser procesado por el operador siguiente en forma parcial sin la necesidad de esperar a que haya terminado. Se suele usar siempre que sea posible.
+
+Al calcular el costo de dos operadores anidados $O_2(O_1(R))$
+debemos considerar que en caso de utilizar pipelining no será
+necesario tener todos los bloques de la salida de $O_1$ para
+comenzar a calcular $O_2$. En particular, no tendremos que
+materializar toda la salida de $O_1$ por falta de espacio en memoria.
+
+
+
+\subsection*{Estimación de la cardinalidad}
+\begin{itemize}
+\item Queremos estimar el tamaño que tiene algún resultado intermedio. Debe de ser precisa, fácil de calcular y no depender de la forma en que se calculo la relación intermedia.
+\item Para la \textbf{selección} se usa la variabilidad. La estimación es de $\frac{n(R)}{V(A_i),R}$. (Se llama selectividad de $A_1$ en R a $\frac{1}{V(A_i),R}$) Otra opción es usar un histograma, es útil para valores concretos.
+\item Para la \textbf{junta} la estimación es de $\frac{n(R) \cdot n(S)}{max(V(R,B), V(S,B))}$.
+\end{itemize}
+
+\newpage
+\subsection*{Reglas de equivalencia}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ReglasEquivalencia.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ReglasEquivalencia2.PNG}
+\end{figure}
+
+
+\subsection*{Heurísticas de optimización}
+\begin{itemize}
+    \item Se realizan las selecciones lo mas temprano posible
+    \item Productos cartesianos por juntas
+    \item Proyectar para descartar atributos no usados lo antes posible (entre selección y proyección priorizar la selección)
+    \item Si hay varias juntas realizar la mas restrictiva primero
+\end{itemize}
+
+\newpage

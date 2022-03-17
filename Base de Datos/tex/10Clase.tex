@@ -1,0 +1,125 @@
+\section{Teoría del Diseño Relacional}
+\section{Forma Normal}
+
+Son reglas para determinar si un esquema que hicimos es lo suficientemente prolijo.
+
+\bigskip
+Para que un modelo sea correcto:
+\begin{itemize}
+\item Tiene que preservar la información, todo lo hecho en el diseño conceptual este en el relacional.
+\item Tiene que tener redundancia mínima, que no hagamos la misma cosa mas de una vez. (Por ejemplo, código postal y localidad, con el código postal ya podemos tener el otro). La redundancia no solo ocupa mas espacio, lleva a inconsistencias.
+\end{itemize}
+
+\bigskip
+Cuando se hace un correcto pasaje, se tiene un esquema sin redundancia y preserva la información que queríamos. Para saber si esto lo hicimos bien necesitamos las formas normales.
+
+\subsection*{Dependencias funcionales}
+Dada una relación, podemos identificar una dependencia funcional como una restricción de que un atributo determina otro $X\rightarrow Y$. \textit{Dos tuplas con igual código postal deben de tener la misma localidad. (localidad es función de código postal) (RIGE esta dependencia) (No es cierto del otro lado)}. 
+
+Para trabajar con esto, se hace conceptualmente, tenemos que pensar que es lo que representan los datos de mi relación. NO tenemos que guiarnos por los datos que tenemos.
+
+\begin{itemize}
+\item Cuando Y esta incluido en X, decimos que Y es trivial.
+\item Las dependencias funcionales siempre se definen a partir de la semántica de los datos, no es posible inferirla con los datos.
+\item Una dependencia que esta bien es legajo implica apellido, CP, localidad (surge a partir de la clave primaria/candidatas).
+\item Hay varias formas normales, si una cumple con una, cumplen con las anteriores. (son subconjuntos) (\textit{Si esta en 3FN esta en 2FN, si esta en 4FN esta en 3FN, ... incluyen a las anteriores.})
+\item El proceso de normalización es una forma de pasar de una forma normal a una superior que preserva toda la información. Partimos de un conjunto de dependencias funcionales que supondremos definido por el diseñador de la base de datos.
+\end{itemize}
+
+
+
+\subsection*{Primera forma normal}
+Los dominios de todos sus atributos solo permiten valores atómicos y monovaluados. En el modelo relacional todos deben de ser así, por lo que no es algo que se vea en las bases de datos.
+Se resolvería creando una tabla separando.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/1FN.PNG}
+\end{figure}
+
+
+\subsection*{Segunda forma normal}
+Cuando una dependencia solo depende de parte de una clave primaria (Siempre ver las claves candidatas), decimos que es una dependencia funcional parcial. Buscamos que no haya de estas.
+
+\medskip
+$X\rightarrow Y$ es parcial cuando existe un subconjunto propio A incluido en X, con A distinto de X para el cual A implica Y. Una dependencia funcional $X \rightarrow Y$ es completa si y sólo si no es
+parcial.
+
+\noindent\rule{\textwidth}{0.5pt}
+\textbf{Atributo primo de una relación}: es aquel que es parte de una clave candidata de la relación\\
+\noindent\rule{\textwidth}{0.5pt}
+
+\medskip
+Decimos que una relación esta en 2FN cuando todos sus atributos no primos dependen por completo de las claves candidatas. Cuando no es así, solucionamos esto realizando otra tabla, separamos lo que participa en una dependencia llevándola a otra.
+\begin{enumerate}
+\item Identificamos las claves candidatas.
+\item Clasificamos a los atributos en primos y no primos.
+\item Revisamos dependencias y resolvemos.
+\end{enumerate}
+
+
+\noindent\rule{\textwidth}{0.5pt}
+\textbf{Descomposición}: Es tener una relación y partirla en varias mas. Es una descomposición de la relación cuando se preserva la información.\\
+
+Si una descomposición cumple que para toda instancia posible de
+R, la junta de las proyecciones sobre los $R_i$ permite recuperar la
+misma instancia de relación, entonces decimos que la
+descomposición preserva la información.
+
+\medskip
+Diremos que la descomposición preserva las dependencias
+funcionales cuando toda dependencia funcional $X \rightarrow Y$ en R
+puede inferirse a partir de dependencias funcionales definidas en
+los $R_i$.
+
+\bigskip
+Una descomposición de R que cumple con ambas propiedades se denomina descomposición equivalente de R.\\
+\noindent\rule{\textwidth}{0.5pt}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/2FN1.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/2FN2.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/2FN3.PNG}
+\end{figure}
+
+\subsection*{Tercera Forma Normal}
+\begin{itemize}
+\item No se esta en 3FN cuando hay un atributo no primo que implica otro atributo no primo y no es trivial. Hay una dependencia transitiva de la clave candidata.
+\item Separamos a Z y a Y en una nueva relación dejando en la relación original al Z. (Nuevas tablas)
+\item Toda dependencia funcional parcial no trivial es transitiva.
+\item Se esta en 3FN cuando no existen dependencias transitivas de atributos no primos.
+\item Otra definición es: para toda dependencia funcional no trivial $X \rightarrow Y$, o bien X es superclave, o bien Y - X contiene sólo atributos primos.
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/3FN.PNG}
+\end{figure}
+
+\subsection*{Forma Normal Boyce-Codd}
+\begin{itemize}
+\item La FNBC dice que no quiere ver ninguna dependencia transitiva (no importa si es primo)
+\item La parte izquierda de toda dependencia funcional no trivial debe de ser superclave. Se arregla separando en una tabla.
+\item Esta forma resuelve casos en los que hay varias clases candidatas, pero pierde dependencias funcionales. Es un compromiso entre la mínima redundancia y perder dependencias funcionales (no siempre se pierden).
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/FNBC.PNG}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/FNBC2.PNG}
+\end{figure}
+
+\newpage

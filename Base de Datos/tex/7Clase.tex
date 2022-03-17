@@ -1,0 +1,325 @@
+\section{SQL}
+
+\begin{itemize}
+\item Es un lenguaje no procedural, basado en el calculo relacional de tuplas.
+\item Tiene 9 partes el ISO SQL actualmente, las mas importantes son 2, la de Foundation (2) y Information and Definition Schemas (11). Se las conoce como Core SQL.
+\item Es una gramática libre de contexto. Su sintaxis puede describirse a través de reglas de reglas de producción.
+\item Para estudiar esto lo mejor es ir a la documentación, tiene las opciones y ejemplos.
+\end{itemize}
+
+
+\subsection*{Tipos de dato (en el estándar)}
+\begin{itemize}
+\item INTEGER
+\item SMALLINT
+\item FLAOT
+\item DOUBLE PRESICION
+\item NUMERIC(i,j): tipo numérico exacto. Permite especificar la precisión i y la escala j en dígitos.
+\item CHARACTER(n) longitud fija
+\item CHARACTER VARYING(n) longitud variable VARCHAR(n)
+\item DATE: yyyy-mm-dd
+\item TIME(i)
+\item TIMESTAMP(i)
+\item BOOLEAN: true, false, unknown - Logica de tres valores.
+\item CLOB: Character Large Object - Generalmente guardados aparte 
+\item BLOB: Binary Large Object
+\end{itemize}
+
+
+El usuario puede definir tipos de dato también:
+\begin{itemize}
+\item CREATE DOMAIN CODIGO\_PAIS AS CHAR(2)
+\end{itemize}
+
+
+\subsubsection*{Configuraciones}
+\begin{itemize}
+\item Las columnas pueden configurarse con valores por defecto con DEFAULT o auto incrementales AUTO\_INCREMENT.
+\item PRIMARY KEY
+\item UNIQUE: una columna o conjunto de columnas no puede estar con valores repetidos.
+\item En el modelo relacional una relación es un conjunto cuyos elementos son las tuplas. Por lo tanto, una tupla no puede estar repetida en una relación. 
+\item En SQL esto no pasa, pueden repetirse. Se conoce como multiset o bag of tuples.
+\end{itemize}
+
+\subsection*{Consultas}
+
+\begin{itemize}
+\item La consulta básica es SELECT ... FROM ... [ WHERE ... ]
+\item SELECT es equivalente a la proyección del álgebra relacional, y el WHERE a la selección del álgebra relacional. La diferencia es que el WHERE no elimina duplicados, no es estrictamente una proyección.
+\end{itemize}
+
+
+\medskip
+
+\subsubsection*{Condiciones en el WHERE}
+\begin{itemize}
+\item Podemos comparar atributos con otros, o con valores.
+\item Realizar un pattern matching
+\item Que este o no en un conjunto
+\item Que este en rangos
+\item Que no sea nulo
+\item Que exista
+\item Que este o no en una tabla
+\item Permite poner otra consulta adentro también, podemos generar anidamientos de consultas.
+\end{itemize}
+
+
+\medskip
+\textit{Nota: el distinto se escribe con <> , y no se pone =NULL se pone es IS NULL}
+
+\subsubsection*{Otros}
+\medskip
+\begin{itemize}
+\item Podemos usar alias para el FROM (tambien para el SELECT para redenominar atributos) con AS para las tablas.
+\item Se permiten operaciones adentro del SELECT (+,-,*,/, etc)
+\item Tenemos funciones de agregación: SUM, COUNT, AVG, MAX, MIN
+\item DISTINCT después del SELECT elimina duplicados
+\item Para comparar patrones LIKE
+\end{itemize}
+
+
+\subsubsection*{Join}
+\begin{itemize}
+\item Clausula JOIN para evitar escribir todas las condiciones de junta. INNER JOIN ... ON, NATURAL JOIN, LEFT/RIGHT/FULL OUTER.
+\item Si no escribo OUTER, sql interpreta que queremos INNER.
+\item Se puede plantear con el WHERE tambien.
+\end{itemize}
+
+
+
+\subsubsection*{Operaciones de conjuntos}
+\begin{itemize}
+\item UNION, INTERSECT, EXCEPT, deben de tener compatibilidad de tipos (misma cantidad de columnas). Si no se agrega ALL se eliminan duplicados
+\end{itemize}
+
+
+\subsubsection*{Ordenamiento y paginación}
+\begin{itemize}
+\item ORDER BY por defecto es ascendente
+\item La forma estándar de la paginación es OFFSET n ROWS FETCH FIRST .. ROWS ONLY. Algunos SGBD implementan LIMIT o TOP
+\end{itemize}
+
+\subsubsection*{Agrupamiento}
+
+\begin{itemize}
+\item Queremos hacer un resumen de ciertos datos.
+\item La agregación colapsa las tuplas que coinciden con una serie de atributos.
+\item Formato: \mint{sql}|SELECT ... FROM ... GROUP BY ... [HAVING ...]|
+\item Puedo usar sin agregar los atributos por los que agrupo. El resto si los quiero los tengo que agregar. (Promedio, suma, cantidad, etc) (Resumir muchos valores en uno)
+\item HAVING es para filtrar con algún valor en particular, es una clausula opcional.
+\item Si en una agregación no se especifican atributos de agregación, el resultado tendrá una única tupla.
+\end{itemize}
+
+
+\subsection*{Subconsultas}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/subconsultas.PNG}
+\end{figure}
+
+\begin{itemize}
+\item Dependencia con lo de afuera
+\item Si no depende se dice que no están correlacionadas, tiene menor costo.
+\item Me doy cuenta si esta correlacionada si usamos algo de la consulta mayor en la subconsulta. Puede pasar que en la ejecución el gestor la logre separar.
+\end{itemize}
+
+
+\subsubsection*{Tablas intermedias}
+Para poder usar el resultado de consultas intermedias, definimos esas tablas como sigue:
+\mint{sql}|WITH nombre AS consulta|
+
+\medskip
+Esta tambien el WITH RECURSIVE que amplia el poder expresivo de SQL.
+
+\begin{itemize}
+\item No se guardan en ningún lado, son solo sintaxis. Seria lo mismo que poner la consulta adentro de la otra.
+\item Son mucho mas claras para documentar la consulta.
+\end{itemize}
+
+\subsection*{Inserciones}
+
+Es posible agregar valores a las tablar mediante:
+\mint{sql}|INSERT INTO tabla VALUES (valores)|
+
+\medskip
+Se puede insertar también el resultado de un SELECT, los tipos tienen que ser compatibles
+
+\medskip
+En cualquiera de los siguientes casos no se inserta el valor.
+\begin{itemize}
+\item Se asigna a una columna un valor fuera de su dominio
+\item Se omitió una columna que no podía ser NULL
+\item Se puso en NULL una columna que no podía ser NULL
+\item La clave primaria asignada ya existe en la tabla
+\item Una clave foránea hace referencia a una clave no existente
+\end{itemize}
+
+
+\subsection*{Eliminaciones}
+
+\mint{sql}|DELETE FROM ... FROM ...WHERE ...|
+
+Si se tenia ON DELETE RESTRICT no se elimina la fila.
+
+\subsection*{Modificaciones}
+\mint{sql}|UPDATE ... SET ... WHERE ...|
+
+Para cada fila t que cumpla alguna condición de las siguientes no se actualiza.
+\begin{itemize}
+\item Se modifica una columna asignándole un valor fuera de su dominio
+\item Se pasó a NULL una columna que no podía tomar ese valor
+\item Se asignó a la clave primaria un valor que ya existe en la tabla
+\item Se modificó una clave foránea para hacer referencia a una clave no existente
+\item Se configuro ON UPDATE RESTRICT
+\end{itemize}
+
+
+\subsection*{Eliminando tablas}
+
+Para tablas: DROP TABLE tabla [RESTRICT|CASCADE]
+
+\medskip
+Para esquemas: DROP SCHEMA esquema [RESTRICT|CASCADE]
+
+
+\subsection*{Otras funciones}
+\begin{itemize}
+    \item SUBSTRING(string FROM start FOR length)
+    \item UPPER/LOWER(string)
+    \item CHAR\_LENGTH(string)
+    \item CAST( attr AS tipo)
+    \item EXTRACT(campo FROM attr) - (para las fechas)
+    \item || para concatenar
+\end{itemize}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+SELECT nro_factura ,
+    CAST(
+        CAST(año_venc AS CHAR) || '-' ||
+        SUBSTRING(('0' || CAST(mes_venc AS VARCHAR)
+                FROM (2 CAST(mes_venc <10 AS INTEGER)) FOR 2)
+        || '-' ||
+        SUBSTRING(('0' || CAST(dia_venc AS VARCHAR))
+                FROM (2 CAST(dia_venc <10 AS INTEGER)) FOR 2) AS DATE
+        ) AS fecha_venc
+FROM Facturas f;
+\end{minted}
+
+\subsection*{Estructura CASE}
+\mint{sql}|CASE WHEN .. THEN .. ELSE ..END|
+Permite agregar lógica de programación a la salida de una sentencia de sql.
+
+
+\subsection*{Vistas en SQL}
+Podemos mostrar a los usuarios determinadas partes de la base de datos a través de las vistas. Se puede decir que es una tabla virtual, el resultado de una operación ejecutada en ese momento. 
+
+Se crean de la siguiente forma:
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+CREATE VIEW nombreVista
+[(nuevoNombreColumna [,...])] AS consulta
+[WITH [CASCADED | LOCAL] CHECK OPTION]
+\end{minted}
+
+
+Ejemplo
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+CREATE VIEW EMP_ACC AS
+SELECT Nombre, Documento, Sector, Sucursal FROM EMPLEADOS;
+\end{minted}
+
+
+El usuario vería solo la información provista por:
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+SELECT * FROM EMP_ACC;
+\end{minted}
+
+
+En las vistas también se pueden buscar casos específicos, agrupar, combinar, son condiciones que se agregan en el SELECT.
+
+Se pueden eliminar vistas con 
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+DROP VIEW nombreVista [RESTRICT | CASCADE]
+\end{minted}
+
+
+RESTRICT si tengo algún objeto relacionado, no ejecuta el borrado
+CASCADE borra todos los objetos dependientes relacionados, aquellos que hagan referencia a la vista
+
+\subsubsection*{Cambios en las vistas}
+
+Como los cambios en las tablas bases se ven automáticamente en las vistas, también se pueden modificar datos a través de las vistas y que modifique las tablas base. Para que pueda pasar esto, no debe de tener operadores conjuntistas, el operador DISTINCT, funciones agregadas, o GROUP BY
+
+Para ser actualizable, FROM debe referenciar a solo una tabla base.
+
+\subsubsection*{Materialización}
+
+Las vistas pueden tomar mucho tiempo si son complejas, se puede evitar con la materialización. Esto realiza una tabla temporal que almacena la vista. Se mantiene la vista por cada cambio de los datos.
+
+\subsubsection*{¿Para que usarlas?}
+
+Las vistas se usarían para:
+\begin{itemize}
+\item Ocultar información
+\item Administración simple de permisos
+\item Personalizar datos
+\item Menor complejidad
+\item Proporcionar compatibilidad con las consultas ya armadas
+\item Integridad de los datos
+\item Combinar datos de servidores
+\end{itemize}
+
+
+\subsubsection*{Privilegios sobre ellas}
+
+Se otorgan privilegios a los usuarios de la siguiente forma
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql}
+GRANT {Lista Privilegios | ALL PRIVILEGES}
+ON NombreObjeto
+TO {ListaIdentifiadoresAutorizacion | PUBLIC}
+[WITH GRANT OPTION]
+\end{minted}
+
+Se pueden revocar con: \mint{sql}|REVOKE|
+
+
+\newpage

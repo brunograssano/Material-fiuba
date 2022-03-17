@@ -1,0 +1,294 @@
+\section{Álgebra relacional}
+\label{sec:relacional}
+
+\begin{itemize}
+\item Es un lenguaje para interactuar con un modelo. 
+\item Están los procedurales y los declarativos.
+\item El álgebra relacional es de tipo procedural, nos va a permitir hacer operaciones usando relaciones (los datos) en vez de números.
+\item Define operadores.
+\item Es la base de la optimización para ejecutar las consultas.
+\item SQL es un lenguaje de tipo declarativo, solamente le digo que quiero, el gestor se encarga de obtener el resultado.
+\end{itemize}
+
+\subsection*{Operaciones básicas}
+Una operación es una función cuyos operandos son relaciones y cuyo resultado es una relación.
+
+\subsubsection*{Operador selección}
+\begin{itemize}
+\item Es unario, deja de una relación solo aquellas filas que cumplan una condición. Se aplica a cada tupla de la relación.
+\item No reduce la cantidad de columnas, solo deja menos filas.
+\item Se usan condiciones atómicas.
+\item Se ponen como subíndice
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/SeleccionOperador.PNG}
+\end{figure}
+
+\subsubsection*{Proyección}
+\begin{itemize}
+\item Es unaria también.
+\item Dada una relación, devuelve una relación cuyas tuplas representan\textbf{ los posibles valores} de los atributos de L indicados en R. \textit{Remueve} tuplas duplicadas, no aparecen múltiples dos veces el mismo valor.
+\end{itemize}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/ProyeccionOperador.PNG}
+\end{figure}
+
+\subsubsection*{Asignación}
+
+\begin{itemize}
+\item Un operador que nos va a ayudar a escribir consultas, rompe en pasos las diferentes operaciones al asignar el resultado a operaciones.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/AsignacionOperador.PNG}
+\end{figure}
+
+
+\subsubsection*{Redenominacion}
+\begin{itemize}
+\item Permite modificar los nombres de los atributos de una relación y/o nombre de la relación misma.
+\item Nos permite preparar el resultado para otra operación.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/RedenominacionOperador.PNG}
+\end{figure}
+
+\newpage
+
+\subsubsection*{Unión}
+\begin{itemize}
+\item Es la unión de dos conjuntos.
+\item Es necesario que tengan el mismo grado y coincidir en dominio (compatibilidad de union o tipo)
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/UnionOperador.PNG}
+\end{figure}
+
+\subsubsection*{Intersección}
+\begin{itemize}
+\item Devuelve aquellas tuplas que están en ambas.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/InterseccionOperador.PNG}
+\end{figure}
+
+\subsubsection*{Diferencia}
+\begin{itemize}
+\item Conserva aquellas tuplas de R que no pertenecen a S. R - S
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/DiferenciaOperador.PNG}
+\end{figure}
+
+\subsubsection*{Producto cartesiano}
+\begin{itemize}
+\item Son todas las posibles tuplas.
+\item Si hay atributos con el mismo nombre, tenemos que distinguirlo con el nombre de la relación.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/ProductoCartesianoOperador.PNG}
+\end{figure}
+
+\newpage 
+
+\subsubsection*{Junta}
+\begin{itemize}
+\item Combina un producto cartesiano con una selección. Dadas dos relaciones y una condición, selecciona del producto cartesiano de las relaciones las tuplas que cumplen la condición.
+\item De condición de selección solo se admiten la conjunción de operaciones atómicas que incluye columnas de ambas relaciones. $=,\neq,\geq,\leq,<,>$ unidos por $and$.
+\item El caso mas general de operación de junta se denomina \textbf{junta theta (theta join)}.
+\end{itemize}
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/JuntaOperador.PNG}
+    \caption{Ejemplo de junta}
+\end{figure}
+
+Cuando la junta solo utiliza comparaciones de igualdad en sus condiciones atómicas, se denomina \textbf{junta por igual (equijoin)}.  El resultado dispone de pares de atributos distintos que poseerán información redundante. Para liberarse de esto, se define la \textbf{junta natural} (evita que se repitan las columnas). No siempre se puede hacer, hay que asegurarse que los pares de atributos se llamen igual. 
+Los atributos se llaman \textbf{atributos de junta}.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/JuntaNaturalOperador.PNG}
+    \caption{Ejemplo de junta natural}
+\end{figure}
+\newpage
+
+\subsubsection*{División (\%)}
+\begin{itemize}
+\item Busca encontrar aquellos elementos de un conjunto A que se vinculan con todos los elementos de un conjunto B. \textit{Ej. A: Alumnos - B: Materias - Vinculo: Tiene nota}
+\item Lo que buscamos es que el producto cartesiano entre el resultado (tabla maximal), y el divisor, no se pase de la tabla original (dividendo) (incluido). 
+\item Permite buscar quienes son todos los que cumplieron con una condición, o que no cumplieron ninguna.
+\item Tenemos dos relaciones, en la cual los atributos de la segunda están incluidos en la primera.
+\end{itemize}
+
+
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/DivisionOperador.PNG}
+\end{figure}
+
+En SQL no se tiene el operador \% de división, pero hay diferentes formas de encarar el problema.
+\begin{itemize}
+\item \textbf{Doble NOT EXISTS}: Surge de una equivalencia lógica. $ \forall x : P(x) \leftrightarrow  \neg\exists x : \neg P(x)$ El NOT EXISTS trabaja a nivel de filas, no le interesa que columnas devuelva. 
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+SELECT padron, nombre, apellido FROM alumnos a
+WHERE NOT EXISTS (
+    SELECT 1 FROM materas m
+    WHERE NOT EXISTS (
+        SELECT 1 FROM notas n
+        WHERE n.padron = a.padron
+        AND n.codigo = m.codigo
+        AND n.numero = m.numero
+    )
+)
+\end{minted}
+
+
+\item \textbf{Resta}: Surge de restar dos conjuntos para cada instancia. \textit{En el ejemplo de los alumnos, para cada alumno, se resta todas las materias del sistema, y todas las materias en las que tiene nota el alumno. Si un alumno tiene nota en todas las materias, el conjunto es el vacio. Para revisar esto se usa NOT EXISTS}
+
+\begin{minted}
+[
+frame=leftline,
+framesep=5mm,
+baselinestretch=1.2,
+]
+{sql} 
+
+SELECT padron, nombre, apellido FROM alumnos a
+WHERE NOT EXISTS (
+    (SELECT codigo, numero FROM materias)
+    EXCEPT
+    (SELECT codigo, numero FROM notas n WHERE n.padron = a.padron)
+)
+\end{minted}
+\item \textbf{Con agrupación}:
+\end{itemize}
+
+% TODO: Continuar viendo el video para completar esto
+
+
+\subsection*{Operaciones adicionales}
+
+\subsubsection*{Junta externa}
+La junta descarta a las tuplas de la relación que no se combinan con ninguna de las otras. La externa evita esto.
+
+Tenemos tres variantes, la izquierda, la derecha, y la completa.
+Agregan valores nulos a los atributos que no se pudieron combinar. (izquierda solo a los de un lado, derecha a los del otro, completa a ambos.)
+
+Tiene una condición para realizarlas.
+
+\newpage
+\section{Calculo Relacional}
+Es de tipo declarativo, nos da un lenguaje para describir que queremos obtener. Esta basado en la lógica de predicados. 
+
+Tiene diferentes partes:
+\begin{itemize}
+\item La lógica de predicados son funciones de varias variables que devuelven un valor de verdad.
+\item Tiene operaciones entre predicados, and, or, negado, entonces
+\item Tiene cuantificadores universales (para todo) para cualquier valor es verdadero, y existenciales (existe) si existe al menos un valor para el cual es verdadero.
+\end{itemize}
+
+
+\subsection*{De tuplas}
+Las variables representan tuplas. Un predicado simple es una función de una tupla o de atributos de tuplas, cuyo resultado es un valor de verdad. SQL se inspiro en esta forma de calculo.
+
+Una expresión del calculo de tuplas tiene la siguiente forma:
+
+\begin{center}
+    $ \{ t_{1} A_{11}, t_{1} A_{12}, \ldots , t_{1} A_{1k_{1}}, \ldots ,  t_{n} A_{nk_{n}} | p(t_{1}, \ldots , t_{n} , \ldots , t_{n+m})  \} $
+\end{center}
+
+Donde:
+\begin{itemize}
+    \item p es un predicado valido
+    \item $ \{ t_{1},\ldots,t_{n} \} $ deben ser variables libres.
+    \item $ \{ t_{n+1},\ldots,t_{n+m} \} $ deben ser variables ligadas
+\end{itemize}
+
+Tiene llaves, y del lado derecho un predicado que toma variables. \textit{\{ \ \ | p($t_{1},..,t_{n},t_{n+1},..,t_{n+m}$) \}}. Tenemos las variables libres y ligadas, quiero que del lado izquierdo solo haya variables libres. (Lenguajes formales)
+
+\subsubsection*{Ejemplos}
+
+\begin{itemize}
+\item \textit{\{ t.name  | NationalTeam(t) \}}: Quiero los nombres que aparecen en NationalTeam. No me dice cual es el procedimiento para encontrarlo, solo decimos que queremos. (t es una variable libre, por lo que la puedo usar en el resultado)
+\item \textit{\{ p.name | Player(p) $\wedge$ p.birth\_date<1980\}}: p esta libre, donde m(p) =  Player(p) $\wedge$ p.birth\_date<1980
+\item \textit{\{ t.name | Player(t) $\wedge$ ( $\exists$ s) (Score(s) $\wedge$ s.player\_id = t.id )\}}: m(t) =  (Score(s) $\wedge$ s.player\_id = t.id), s esta solo adentro de este m, esta ligada al cuantificador, por lo que no se puede utilizar del lado izquierdo.
+\end{itemize}
+
+
+Cuando cuantifico una variable no puede aparecer del lado izquierdo de la barra, se vuelve ligada.
+
+\medskip
+
+Jugador mas anciano del mundial, las siguientes son equivalentes (es mas practico pensarlo con los existe):
+\begin{itemize}
+\item \{ p.name, p.birth\_date | Player(p) $\wedge$ ($ \neg \exists p2 $) (Player(p2) $and$ p2.birth\_date < p.birth\_date ) \}
+\item \{ p.name, p.birth\_date | Player(p) $\wedge$ ($ \forall p2 $) ($\not$Player(p2) $or$ p2.birth\_date $\geq$ p.birth\_date ) \}
+\item \{ p.name, p.birth\_date | Player(p) $\wedge$ ($ \forall p2 $) (Player(p2) $\rightarrow$ p2.birth\_date $\geq$ p.birth\_date ) \}
+\end{itemize}
+
+
+\medskip
+Llevándolo al álgebra relacional, podría verse así la selección:
+
+\begin{itemize}
+\item $\sigma(R)_{cond}$ = \{ t | R(t) $\wedge$ cond\}
+\end{itemize}
+
+\subsubsection*{Expresiones seguras}
+No toda expresión valida del calculo de tuplas es una expresión segura (safe expression). Por ejemplo:
+
+\begin{center}
+    \{p.name|$\neg$Player(p)\}
+\end{center}
+
+\begin{itemize}
+\item Devuelve una cantidad infinita de tuplas como 'safsq' o 57.
+\item Una expresión segura es aquella que devuelve una cantidad finita de tuplas.
+\end{itemize}
+
+
+\subsection*{De Dominios}
+\begin{itemize}
+\item Las variables representan atributos. Un predicado simple es una función de un conjunto de dominios cuyo resultado es V o F. Tiene los mismos cuantificadores y forma de expresión. 
+\item Las variables que no quiero devolver las tengo que cuantificar.
+\end{itemize}
+
+
+\subsection*{Completitud Relacional}
+Se demostró la equivalencia entre el álgebra relacional básica y el calculo relacional. Esto implica que ambos tienen el mismo poder expresivo.
+
+
+\newpage
