@@ -1,0 +1,33 @@
+[submodule "Modelos-I-fiuba"]
+	path = Modelos-I-fiuba
+	url = https://github.com/brunograssano/Modelos-I-fiuba
+[submodule "Lenguajes formales/interprete-de-scheme"]
+	path = Lenguajes formales/interprete-de-scheme
+	url = https://github.com/brunograssano/interprete-de-scheme
+[submodule "Sistemas-operativos-fiuba"]
+	path = Sistemas-operativos-fiuba
+	url = https://github.com/brunograssano/Sistemas-operativos-fiuba
+[submodule "Analisis-de-la-informacion-fiuba"]
+	path = Analisis-de-la-informacion-fiuba
+	url = https://github.com/brunograssano/Analisis-de-la-informacion-fiuba
+[submodule "OrgaDeProduccion-fiuba"]
+	path = OrgaDeProduccion-fiuba
+	url = https://github.com/brunograssano/OrgaDeProduccion-fiuba
+[submodule "Organizacion-de-datos-fiuba"]
+	path = Organizacion-de-datos-fiuba
+	url = https://github.com/brunograssano/Organizacion-de-datos-fiuba
+[submodule "Organizacion-de-computadoras-fiuba"]
+	path = Organizacion-de-computadoras-fiuba
+	url = https://github.com/brunograssano/Organizacion-de-computadoras-fiuba
+[submodule "Algoritmos-1-fiuba"]
+	path = Algoritmos-1-fiuba
+	url = https://github.com/brunograssano/Algoritmos-1-fiuba
+[submodule "Algoritmos-2-fiuba"]
+	path = Algoritmos-2-fiuba
+	url = https://github.com/brunograssano/Algoritmos-2-fiuba
+[submodule "Analisis_Numerico_fiuba"]
+	path = Analisis_Numerico_fiuba
+	url = https://github.com/brunograssano/Analisis_Numerico_fiuba
+[submodule "Algoritmos-3-fiuba"]
+	path = Algoritmos-3-fiuba
+	url = https://github.com/brunograssano/Algoritmos-3-fiuba
